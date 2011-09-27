@@ -1,0 +1,21 @@
+<html>
+	<head>
+		<title>Login</title>
+	</head>
+	<body>
+		<form method="post" action="subscribe">
+			<p>What's your name:
+				<input type="text" length="12" name="name">
+			</p>
+			<p>What's your email address:
+				<input type="text" length="20" name="email">
+			</p>
+			<p>Choose your favorite foods:</p>
+			<input type="text" length="12" name="food"></br>
+			<select multiple name="globalfoods" size="15">
+				{{#globalfoods}}
+				<option value="{{_id}}">{{name}}</option>
+				{{/globalfoods}}
+			</select>
+		</form>
+</html>
