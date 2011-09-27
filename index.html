@@ -1,0 +1,25 @@
+<html>
+	<head>
+		<title>Today's Ratty Menu</title>
+	</head>
+	<body>
+		<h1>Today's Ratty Menu</h1>
+		<h2>Breakfast</h2>
+			<ul>
+			{{#breakfast}}
+				<li>{{.}}</li>
+			{{/breakfast}}
+			</ul>
+		<h2>Lunch</h2>
+			<ul>
+			{{#lunch}}
+				<li>{{.}}</li>
+			{{.lunch}}
+			</ul>
+		<h2>Dinner</h2>
+			<ul>
+			{{#dinner}}
+				<li>{{.}}</li>
+			{{.dinner}}
+			</ul>	</body>
+</html>
