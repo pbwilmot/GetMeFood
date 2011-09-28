@@ -5,6 +5,9 @@ var db = mongoose.connect('mongodb://localhost/getmefood');
 var User = new Schema({
 	name : String,
 	email : String,
+	phone : String,
+	useEmail : String,
+	usePhone : String,
 	foods : [String]
 });
 
@@ -40,14 +43,11 @@ function addItem(item) {
 	});
 }
 
-function getUser(emailAddr, callback) {
-	User.findOne({email:emailAddr}, callback);
-}
-
 function getGlobalFoods(callback) {
 	Food.find({}, callback);
 }
 
 exports.getGlobalFoods = getGlobalFoods;
 exports.addGlobalFoods = addGlobalFoods;
-exports.getUser = getUser;
+exports.User = User;
+exports.Food = Food;

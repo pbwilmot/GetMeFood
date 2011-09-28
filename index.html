@@ -1,0 +1,65 @@
+<html>
+	<head>
+		<title>Login</title>
+		<script type="text/javascript">
+			function add_clicked() {
+				var options = document.f.globalfoods.options;
+				for (var i = 0; i < options.length; i++) {
+					if (options[i].selected) {
+						// now checkk if we've already added it
+						var chosen = document.f.foodchoices.options;
+						var found = false;
+						for (var j = 0; j < chosen.length; j++) {
+							if (chosen[j].value === options[i].value) {
+								found = true;
+								break;
+							}
+						}
+						if (!found) {
+							var opt = document.createElement("option");
+							opt.text = options[i].text;
+							opt.value = options[i].value;
+							chosen.add(opt);
+						}
+					}
+				}
+			}
+			
+			function remove_clicked() {
+				var chosen = document.f.foodchoices.options;
+				var index = 0;
+				while (index < chosen.length) {
+					if (chosen[index].selected) {
+						chosen.remove(index);
+					}
+					else
+						index++;
+				}
+			}
+		</script>
+	</head>
+	<body>
+		<form name="f" method="post" action="subscribe">
+			<p>What's your name:
+				<input type="text" length="12" name="name">
+			</p>
+			<p>Choose your favorite foods:</p>
+			<select multiple id="globalfoods" name="globalfoods" size="15">
+				{{#globalfoods}}
+				<option value="{{_id}}">{{name}}</option>
+				{{/globalfoods}}
+			</select><br />
+			<input type="button" value="Add" name="add" onclick="add_clicked()" /> <input type="button" value="Remove" name="remove" onclick="remove_clicked()" />
+			<p>Your selected foods:</p>
+			<select multiple name="foodchoices" size="10" />
+			<p>Notify me through</p>
+			<input type="checkbox" name="notify" value="email" />Email: <input type="text" length="20" name="email" /><br />
+			<input type="checkbox" name="notify" value="text" />Text message: <input type="text" length="20" name="phone" />	Carrier:
+			<select name="cellcarrier">
+				<option value="att">AT&T</option>
+				<option value="verizon">Verizon</option>
+				<option value="sprint">Sprint</option>
+			</select></br>
+			<input type="submit" value="Submit" />
+		</form>
+</html>
