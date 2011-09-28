@@ -8,6 +8,7 @@ var User = new Schema({
 	phone : String,
 	useEmail : String,
 	usePhone : String,
+	cellcarrier : String,
 	foods : [String]
 });
 

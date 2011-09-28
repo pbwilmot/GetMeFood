@@ -36,6 +36,17 @@
 						index++;
 				}
 			}
+			
+			function submit_clicked() {
+				var val = "";
+				var options = document.f.foodchoices.options;
+				for (var i = 0; i < options.length; i++) {
+					if (i != 0)
+						val += ",";
+					val += options[i].value;
+				}
+				document.f.foods.value = val;
+			}
 		</script>
 	</head>
 	<body>
@@ -51,15 +62,16 @@
 			</select><br />
 			<input type="button" value="Add" name="add" onclick="add_clicked()" /> <input type="button" value="Remove" name="remove" onclick="remove_clicked()" />
 			<p>Your selected foods:</p>
-			<select multiple name="foodchoices" size="10" />
-			<p>Notify me through</p>
+			<select multiple name="foodchoices" size="10" /><br />
+			<p>Notify me through:</p>
 			<input type="checkbox" name="notify" value="email" />Email: <input type="text" length="20" name="email" /><br />
-			<input type="checkbox" name="notify" value="text" />Text message: <input type="text" length="20" name="phone" />	Carrier:
+			<input type="checkbox" name="notify" value="phone" />Text message: <input type="text" length="20" name="phone" />	Carrier:
 			<select name="cellcarrier">
-				<option value="att">AT&T</option>
-				<option value="verizon">Verizon</option>
+				<option value="txt.att.net">AT&T</option>
+				<option value="vtext.com">Verizon</option>
 				<option value="sprint">Sprint</option>
 			</select></br>
-			<input type="submit" value="Submit" />
+			<input type="submit" value="Submit" onclick="submit_clicked()" />
+			<input type="hidden" name="foods" />
 		</form>
 </html>
