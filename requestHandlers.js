@@ -21,6 +21,18 @@ function getMealMatches(user, menufoods) {
 	return matches;
 }
 
+function removeDuplicates(array) {
+	var set = {};
+	for (var i = 0; i < array.length; i++) {
+		set[array[i].toLowerCase()] = array[i];
+	}
+	var newArray = [];
+	for (var item in set) {
+		newArray.push(set[item]);
+	}
+	return newArray;
+}
+
 function getDailyMatches(user, menufoods) {
 	var counter = 3;
 	var mealMatches = [[],[],[]];
@@ -109,9 +121,8 @@ function emailmatches(pathname, response, postData) {
 
 function rattymenu(pathname, response, postData) {
 	menus.getRattyMenu(function(items) {
-		db.addGlobalFoods(items[0]); // breakfast
-		db.addGlobalFoods(items[1]);
-		db.addGlobalFoods(items[2]);
+		var allitems = removeDuplicates(items[0].concat(items[1], items[2]));
+		db.addGlobalFoods(allitems);
 		fs.readFile('ratty.html', function(err, template) {
 			response.writeHead(200, {"Content-Type": "text/html"});
 			response.write(mustache.to_html(template.toString(), {breakfast: items[0], lunch: items[1], dinner: items[2]}));
