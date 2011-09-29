@@ -1,0 +1,22 @@
+Hey {{name}},
+
+{{#hasBreakfast}}
+Breakfast:
+	{{#breakfast}}
+	{{.}}
+	{{/breakfast}}
+{{/hasBreakfast}}
+
+{{#hasLunch}}
+Lunch:
+	{{#lunch}}
+	{{.}}
+	{{/lunch}}
+{{/hasLunch}}
+
+{{#hasDinner}}
+Dinner:
+	{{#dinner}}
+	{{.}}
+	{{/dinner}}
+{{/hasDinner}}
