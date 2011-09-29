@@ -41,7 +41,7 @@ function index(pathname, response, postData) {
 }
 
 function listdb(pathname, response, postData) {
-	db.getGlobalFoods(function(fooderr, fooddoc) {
+	db.Food.find({}, function(fooderr, fooddoc) {
 		db.User.find({}, function(usererr, userdoc) {
 				fs.readFile('listdb.html', function(err, template) {
 				response.writeHead(200, {"Content-Type": "text/html"});
