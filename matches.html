@@ -1,0 +1,38 @@
+<html>
+	<head>
+		<title>Food Matches</title>
+	</head>
+	<body>
+		<h1>Food Matches</h1>
+		<h2>Users</h2>
+			<ul>
+			{{#users}}
+				<li><code>{{usertext}}</code>
+					<ul>
+						<li>Breakfast
+							<ul>
+								{{#bmatches}}
+									<li><code>{{.}}</code></li>
+								{{/bmatches}}
+							</ul>
+						</li>
+						<li>Lunch
+							<ul>
+								{{#lmatches}}
+									<li><code>{{.}}</code></li>
+								{{/lmatches}}
+							</ul>
+						</li>
+						<li>Dinner
+							<ul>
+								{{#dmatches}}
+									<li><code>{{.}}</code></li>
+								{{/dmatches}}
+							</ul>
+						</li>
+					</ul>
+				</code></li>
+			{{/users}}
+			</ul>
+	</body>
+</html>

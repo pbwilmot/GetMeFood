@@ -1,4 +1,5 @@
-var mongoose = require("mongoose");
+var mongoose = require("mongoose"),
+	ObjectId = mongoose.ObjectId;
 
 var Schema = mongoose.Schema;
 var db = mongoose.connect('mongodb://localhost/getmefood');
@@ -9,7 +10,7 @@ var User = new Schema({
 	useEmail : String,
 	usePhone : String,
 	cellcarrier : String,
-	foods : [String]
+	foods : [ String ]
 });
 
 var Food = new Schema({
@@ -26,20 +27,20 @@ function addGlobalFoods(list) {
 	}
 }
 
-function addItem(item) {
-	Food.findOne({name:item}, function(err, doc) {
+function addItem(itemName) {
+	Food.findOne({name:itemName}, function(err, doc) {
 		if (doc === null) {
 			// no entry found, so let's make it
 			var newItem = new Food();
-			newItem.name = item;
+			newItem.name = itemName;
 			newItem.occurrence = 1;
 			newItem.save();
-			console.log(newItem.name + " added");
+			//console.log(newItem.name + " added");
 		}
 		else {
 			doc.occurrence++;
 			doc.save();
-			console.log(doc.name + " updated: " + doc.occurrence);
+			//console.log(doc.name + " updated: " + doc.occurrence);
 		}
 	});
 }
@@ -48,6 +49,7 @@ function getGlobalFoods(callback) {
 	Food.find({}, callback);
 }
 
+exports.addItem = addItem;
 exports.getGlobalFoods = getGlobalFoods;
 exports.addGlobalFoods = addGlobalFoods;
 exports.User = User;

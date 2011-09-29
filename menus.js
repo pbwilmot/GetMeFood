@@ -36,12 +36,25 @@ function parseMenu(pageText) {
 	var lunch = meals[2];
 	var dinner = meals[3];
 	
-	var food = { breakfast: parseFoodList(breakfast),
-		lunch: parseFoodList(lunch),
-		dinner: parseFoodList(dinner)
-	};
+	var food = [];
+	for (var i = 1; i < 4; i++) {
+		// meals 1-3 are breakfast, lunch, dinner
+		food.push(removeDuplicates(parseFoodList(meals[i])));
+	}
 	
 	return food;
+}
+
+function removeDuplicates(array) {
+	var set = {};
+	for (var i = 0; i < array.length; i++) {
+		set[array[i]] = true;
+	}
+	var newArray = [];
+	for (var item in set) {
+		newArray.push(item);
+	}
+	return newArray;
 }
 
 function parseFoodList(foodText) {
