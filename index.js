@@ -14,6 +14,7 @@ handlers["/clearusers"] = requestHandlers.clearusers;
 handlers["/clearfoods"] = requestHandlers.clearfoods;
 handlers["/rattymenu"] = requestHandlers.rattymenu;
 handlers["/listdb"] = requestHandlers.listdb;
+handlers["/emailmatches"] = requestHandlers.emailmatches;
 handlers["/matches"] = requestHandlers.matches;
 
 function startServer() {

@@ -57,7 +57,7 @@
 			<p>Choose your favorite foods:</p>
 			<select multiple id="globalfoods" name="globalfoods" size="15">
 				{{#globalfoods}}
-				<option value="{{name}}">{{name}}</option>
+				<option value="{{{name}}}">{{name}}</option>
 				{{/globalfoods}}
 			</select><br />
 			<input type="button" value="Add" name="add" onclick="add_clicked()" /> <input type="button" value="Remove" name="remove" onclick="remove_clicked()" />

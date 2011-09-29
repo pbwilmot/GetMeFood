@@ -45,12 +45,7 @@ function addItem(itemName) {
 	});
 }
 
-function getGlobalFoods(callback) {
-	Food.find({}, callback);
-}
-
 exports.addItem = addItem;
-exports.getGlobalFoods = getGlobalFoods;
 exports.addGlobalFoods = addGlobalFoods;
 exports.User = User;
 exports.Food = Food;

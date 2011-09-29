@@ -1,6 +1,7 @@
 var db = require("./db");
 var mongoose = require("mongoose");
 var mustache = require("mustache");
+var email = require("./email");
 var menus = require("./menus");
 var fs = require("fs");
 var querystring = require("querystring");
@@ -30,7 +31,7 @@ function getDailyMatches(user, menufoods) {
 }
 
 function index(pathname, response, postData) {
-	db.getGlobalFoods(function(err, doc) {
+	db.Food.find({}, function(err, doc) {
 		fs.readFile('index.html', function(err, template) {
 			response.writeHead(200, {"Content-Type": "text/html"});
 			response.write(mustache.to_html(template.toString(), {globalfoods: doc}));
@@ -79,6 +80,29 @@ function matches(pathname, response, postData) {
 				response.write(mustache.to_html(template.toString(), {users: userlist}));
 				response.end();
 			});
+		});
+	});
+}
+
+function emailmatches(pathname, response, postData) {
+	menus.getRattyMenu(function(items) {
+		db.User.find({}, function(usererr, userdoc) {
+			response.writeHead(200, {"Content-Type": "text/html"});
+			response.write("Matches sent");
+			response.end();
+			
+			for (var i = 0; i < userdoc.length; i++) {
+				var matches = getDailyMatches(userdoc[i], items);
+				var data = { hasBreakfast : (matches[0].length > 0),
+							hasLunch : (matches[1].length > 0),
+							hasDinner : (matches[2].length > 0),
+							breakfast : matches[0],
+							lunch : matches[1],
+							dinner: matches[2],
+							name : userdoc[i].name };
+							
+				email.sendEmailWithTemplate(userdoc[i], "Today's Menu", "emailtemplate.txt", data, function(err, result) {});
+			}
 		});
 	});
 }
@@ -163,3 +187,4 @@ exports.clearfoods = clearfoods;
 exports.rattymenu = rattymenu;
 exports.listdb = listdb;
 exports.matches = matches;
+exports.emailmatches = emailmatches;
