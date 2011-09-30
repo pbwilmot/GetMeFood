@@ -20,3 +20,5 @@ Dinner:
 	{{.}}
 	{{/dinner}}
 {{/hasDinner}}
+
+<a href="{{unsubscribeLink}}">Unsubscribe</a>

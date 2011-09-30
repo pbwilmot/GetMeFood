@@ -1,0 +1,13 @@
+<html>
+	<head>
+		<title>Unsubscribe</title>
+	</head>
+	<body>
+		<h1>Unsubscribe</h1>
+		<form method="post" action="unsubscribe">
+			<p>{{name}}, are you sure you want to unsubscribe?</p>
+			<input type="hidden" name="id" value="{{_id}}" />
+			<input type="hidden" name="confirm" value="true" />
+			<input type="submit" value="Unsubscribe" />
+		</form>
+</html>

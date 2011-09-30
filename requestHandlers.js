@@ -5,6 +5,7 @@ var email = require("./email");
 var menus = require("./menus");
 var fs = require("fs");
 var querystring = require("querystring");
+var url = require("url");
 
 function getMealMatches(user, menufoods) {
 	var matches = [];
@@ -42,7 +43,7 @@ function getDailyMatches(user, menufoods) {
 	return mealMatches;
 }
 
-function index(pathname, response, postData) {
+function index(pathname, request, response, postData) {
 	db.Food.find({}, function(err, doc) {
 		fs.readFile('index.html', function(err, template) {
 			response.writeHead(200, {"Content-Type": "text/html"});
@@ -52,7 +53,45 @@ function index(pathname, response, postData) {
 	});
 }
 
-function listdb(pathname, response, postData) {
+function unsubscribe(pathname, request, response, postData) {
+	var query;
+	if (request.method === 'GET') 
+		query = url.parse(request.url, parseQueryString=true).query;
+	else
+		query = querystring.parse(postData);
+	var confirm = query.confirm;
+	var id = query.id;
+	if (confirm != 'true' || request.method === 'GET') {
+		response.writeHead(200, {"Content-Type": "text/html"});
+		db.User.findById(id, function(err, doc) {
+			if (err) {
+				response.write(err);
+				response.end();
+			}
+			else {
+				fs.readFile('unsubscribe.html', function(err, template) {
+					if (template === null)
+						response.write("User not found");
+					else
+						response.write(mustache.to_html(template.toString(), doc));
+					response.end();
+				});
+			}
+		});
+	}
+	else {
+		db.User.remove({_id : id}, function(err, doc) {
+			response.writeHead(200, {"Content-Type": "text/html"});
+			if (!err)
+				response.write("User removed");
+			else
+				response.write(JSON.stringify(err));
+			response.end();
+		});
+	}
+}
+
+function listdb(pathname, request, response, postData) {
 	db.Food.find({}, function(fooderr, fooddoc) {
 		db.User.find({}, function(usererr, userdoc) {
 				fs.readFile('listdb.html', function(err, template) {
@@ -77,7 +116,7 @@ function isMatch(foodpref, menuitem) {
 	return (foodpref.toLowerCase() == menuitem.toLowerCase());
 }
 
-function matches(pathname, response, postData) {
+function matches(pathname, request, response, postData) {
 	menus.getRattyMenu(function(items) {
 		db.User.find({}, function(usererr, userdoc) {
 			fs.readFile('matches.html', function(err, template) {
@@ -96,7 +135,7 @@ function matches(pathname, response, postData) {
 	});
 }
 
-function emailmatches(pathname, response, postData) {
+function emailmatches(pathname, request, response, postData) {
 	menus.getRattyMenu(function(items) {
 		db.User.find({}, function(usererr, userdoc) {
 			response.writeHead(200, {"Content-Type": "text/html"});
@@ -111,7 +150,8 @@ function emailmatches(pathname, response, postData) {
 							breakfast : matches[0],
 							lunch : matches[1],
 							dinner: matches[2],
-							name : userdoc[i].name };
+							name : userdoc[i].name,
+							unsubscribeLink : "http://" + request.headers.host + "/unsubscribe?id=" + userdoc[i]._id };
 							
 				email.sendEmailWithTemplate(userdoc[i], "Today's Menu", "emailtemplate.txt", data, function(err, result) {});
 			}
@@ -119,7 +159,7 @@ function emailmatches(pathname, response, postData) {
 	});
 }
 
-function rattymenu(pathname, response, postData) {
+function rattymenu(pathname, request, response, postData) {
 	menus.getRattyMenu(function(items) {
 		var allitems = removeDuplicates(items[0].concat(items[1], items[2]));
 		db.addGlobalFoods(allitems);
@@ -131,7 +171,7 @@ function rattymenu(pathname, response, postData) {
 	});
 }
 
-function clearusers(pathname, response, postData) {
+function clearusers(pathname, request, response, postData) {
 	db.User.remove({}, function(err, doc) {
 		if (!err)
 			response.write("All users cleared");
@@ -141,7 +181,7 @@ function clearusers(pathname, response, postData) {
 	});
 }
 
-function clearfoods(pathname, response, postData) {
+function clearfoods(pathname, request, response, postData) {
 	db.Food.remove({}, function(err, doc) {
 		if (!err)
 			response.write("All foods cleared");
@@ -151,7 +191,7 @@ function clearfoods(pathname, response, postData) {
 	});
 }
 
-function subscribe(pathname, response, postdata) {
+function subscribe(pathname, request, response, postdata) {
 	var query = querystring.parse(postdata);
 	db.User.findOne({email: query.email}, function(err, doc) {
 		if (doc === null) {
@@ -199,3 +239,4 @@ exports.rattymenu = rattymenu;
 exports.listdb = listdb;
 exports.matches = matches;
 exports.emailmatches = emailmatches;
+exports.unsubscribe = unsubscribe;

@@ -16,6 +16,7 @@ handlers["/rattymenu"] = requestHandlers.rattymenu;
 handlers["/listdb"] = requestHandlers.listdb;
 handlers["/emailmatches"] = requestHandlers.emailmatches;
 handlers["/matches"] = requestHandlers.matches;
+handlers["/unsubscribe"] = requestHandlers.unsubscribe;
 
 function startServer() {
 	var server = http.createServer(function(request, response) {
@@ -36,7 +37,7 @@ function startServer() {
 			});
 
 			request.addListener("end", function() {
-				handler(pathname, response, postData);
+				handler(pathname, request, response, postData);
 			});
 		}
 	});
