@@ -6,10 +6,6 @@ var db = mongoose.connect('mongodb://localhost/getmefood');
 var User = new Schema({
 	name : String,
 	email : String,
-	phone : String,
-	useEmail : String,
-	usePhone : String,
-	cellcarrier : String,
 	foods : [ String ]
 });
 

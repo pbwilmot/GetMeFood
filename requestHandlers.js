@@ -43,11 +43,31 @@ function getDailyMatches(user, menufoods) {
 	return mealMatches;
 }
 
+function edit(pathname, request, response, postData) {
+	db.Food.find({}, function(fooderr, fooddoc) {
+		var emailAddr = url.parse(request.url, parseQueryString=true).query["email"];
+		db.User.findOne({email: emailAddr}, function(usererr, userdoc) {
+			console.log("userdoc: " + JSON.stringify(userdoc));
+			fs.readFile('edit.html', function(err, template) {
+				response.writeHead(200, {"Content-Type": "text/html"});
+				var userfoods = null;
+				var username = null;
+				if (userdoc != null) {
+					userfoods = userdoc.foods;
+					username = userdoc.name;
+				}
+				response.write(mustache.to_html(template.toString(), {globalfoods: fooddoc, email : emailAddr, userfoods: userfoods, username: username}));
+				response.end();
+			});
+		});
+	});
+}
+
 function index(pathname, request, response, postData) {
 	db.Food.find({}, function(err, doc) {
 		fs.readFile('index.html', function(err, template) {
 			response.writeHead(200, {"Content-Type": "text/html"});
-			response.write(mustache.to_html(template.toString(), {globalfoods: doc}));
+			response.write(template); // no mustache in the landing page
 			response.end();
 		});
 	});
@@ -65,7 +85,7 @@ function unsubscribe(pathname, request, response, postData) {
 		response.writeHead(200, {"Content-Type": "text/html"});
 		db.User.findById(id, function(err, doc) {
 			if (err) {
-				response.write(err);
+				response.write(JSON.stringify(err));
 				response.end();
 			}
 			else {
@@ -194,40 +214,28 @@ function clearfoods(pathname, request, response, postData) {
 function subscribe(pathname, request, response, postdata) {
 	var query = querystring.parse(postdata);
 	db.User.findOne({email: query.email}, function(err, doc) {
-		if (doc === null) {
-			var foodstring = query.foods;
-			var foodstrings;
-			if (foodstring === undefined || foodstring.length === 0) {
-				foods = [];
-			}
-			else
-				foods = foodstring.split(",");
-			console.log(foodstring);
-			console.log(foods);
+		var user;
+		if (doc === null)
+			user = new db.User();
+		else
+			user = doc;
+			
+		var foodstring = query.foods;
+		var foodstrings;
+		if (foodstring === undefined || foodstring.length === 0) {
+			foods = [];
+		}
+		else
+			foods = foodstring.split(",");
+	
+		user.name = query.name;
+		user.email = query.email;
+		user.foods = foods;
+		user.save();
 		
-			var user = new db.User();
-			user.name = query.name;
-			user.email = query.email;
-			user.phone = query.phone;
-			user.cellCarrier = query.cellcarrier;
-			user.foods = foods;
-			
-			user.usePhone = (query.notify === "phone" || (query.notify instanceof Array && query.notify.indexOf("phone") != -1));
-			user.useEmail = (query.notify === "email" || (query.notify instanceof Array && query.notify.indexOf("email") != -1));
-			console.log(query.notify);
-			console.log("phone: " + user.usePhone);
-			console.log("email: " + user.useEmail);
-			
-			user.save();
-			response.writeHead(200, {"Content-Type": "text/html"});
-			response.write("User added:\n" + user);
-			response.end();
-		}
-		else {
-			response.writeHead(200, {"Content-Type": "text/html"});
-			response.write("User already exists");
-			response.end();
-		}
+		response.writeHead(200, {"Content-Type": "text/html"});
+		response.write("User " + (doc === null ? "added:\n" : "updated:\n") + JSON.stringify(user));
+		response.end();
 	});
 }
 
@@ -240,3 +248,4 @@ exports.listdb = listdb;
 exports.matches = matches;
 exports.emailmatches = emailmatches;
 exports.unsubscribe = unsubscribe;
+exports.edit = edit;

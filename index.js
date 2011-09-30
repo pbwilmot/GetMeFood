@@ -17,6 +17,7 @@ handlers["/listdb"] = requestHandlers.listdb;
 handlers["/emailmatches"] = requestHandlers.emailmatches;
 handlers["/matches"] = requestHandlers.matches;
 handlers["/unsubscribe"] = requestHandlers.unsubscribe;
+handlers["/edit"] = requestHandlers.edit;
 
 function startServer() {
 	var server = http.createServer(function(request, response) {
