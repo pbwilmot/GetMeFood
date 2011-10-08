@@ -48,11 +48,10 @@ app.post('/unsubscribe', requestHandlers.unsubscribePost);
 
 function scheduleMessage() {
 	var now = new Date();
-	var millis = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 7, 0, 0, 0).getTime() - now.getTime();
+	var millis = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 8, 21, 0, 0).getTime() - now.getTime();
 	if (millis <= 0)
 		millis += 1000 * 60 * 60 * 24;
 	setTimeout(sendEmails, millis);
-	console.log(now.toLocaleString());
 }
 
 function sendEmails() {
