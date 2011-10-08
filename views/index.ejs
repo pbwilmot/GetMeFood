@@ -1,9 +1,13 @@
-<h1>Get Me Food!</h1>
-<form method="get" action="edit">
+<div class="page-header">
+	<h1>Get Me Food!</h1>
+</div>
+<form class="form-stacked" method="get" action="edit">
 	<% if (locals.error) { %>
-	<p><%= error %></p>
+		<div class="alert-message block-message error">
+			<p><%= error %></p>
+		</div>
 	<% } %>
-	<p>What's your email address?</p>
-	<input type="text" name="email" length="20" text="<%= (locals.email ? email : "") %>"/>
+	<label for="email">What's your email address?</label>
+	<input type="text" class="xlarge" id="email" name="email" length="20" text="<%= (locals.email ? email : "") %>"/>
 	<input type="submit" value="Go" />
 </form>

@@ -44,34 +44,61 @@
 			}
 			document.f.foods.value = val;
 		}
+		
+		 /*$(document).ready(function(){
+  		 	var data = "Core Selectors Attributes Traversing Manipulation CSS Events Effects Ajax Utilities".split(" ");
+  		 	alert('ehh');
+			$("#customtext").autocomplete(data);
+			alert("Autocomplete");
+ 	 	});*/
 	</script>
+	<div class="page-header">
+		<h1>Choose your foods</h1>
+	</div>
 	<form name="f" method="post" action="edit">
 		<% if (errors.length > 0) { %>
-		<p>The following errors occurred in submitting the form:
+		<div class="alert-message block-message error">
+		<p><strong>There were some errors</strong>
 			<ul>
 			<% for (var i = 0; i < errors.length; i++) { %>
 				<li><%= errors[i] %></li>
 			<% } %>
 			</ul>
 		</p>
+		</div>
 		<% } %>
-		<p>What's your name:
-			<input type="text" length="12" name="name" value="<%= username %>">
+		<label for="name">What's your name:</label>
+		<div class="input">
+			<input class="xlarge span5" type="text" id="name" name="name" value="<%= username %>" />
+		</div>
 		</p>
-		<p>Choose your favorite foods:</p>
-		<select multiple id="globalfoods" name="globalfoods" size="15">
-			<% for (var i = 0; i < globalfoods.length; i++) { %>
-			<option value="<%= globalfoods[i].name %>"><%= globalfoods[i].name %></option>
-			<% } %>
-		</select><br />
-		<input type="button" value="Add" name="add" onclick="add_clicked()" /> <input type="button" value="Remove" name="remove" onclick="remove_clicked()" />
-		<p>Your selected foods:</p>
-		<select multiple name="foodchoices" size="10">
-			<% for (var i = 0; i < userfoods.length; i++) { %>
-				<option name="foodchoices" value="<%= userfoods[i] %>"><%= userfoods[i] %></option>
-			<% } %>
-		</select><br />
+		<label for="globalfoods">Choose your favorite foods:</label>
+		<div class="input">
+			<select class="span5" multiple id="globalfoods" name="globalfoods" size="15">
+				<% for (var i = 0; i < globalfoods.length; i++) { %>
+				<option value="<%= globalfoods[i].name %>"><%= globalfoods[i].name %></option>
+				<% } %>
+			</select>
+		</div>
+		<div class="input">
+			<input type="button" value="Add" name="add" onclick="add_clicked()" class="btn" />
+			<input type="button" value="Remove" name="remove" onclick="remove_clicked()" class="btn" />
+		</div>
+		<label for="foodchoices">Your selected foods:</label>
+		<div class="input">
+			<select class="span5" multiple id="foodchoices" name="foodchoices" size="10">
+				<% for (var i = 0; i < userfoods.length; i++) { %>
+					<option name="foodchoices" value="<%= userfoods[i] %>"><%= userfoods[i] %></option>
+				<% } %>
+			</select>
+		</div>
+		<label for="customtext">Type your own choices:</label>
+		<div class="input">
+			<input id="customtext" />
+		</div>
 		<input type="hidden" name="email" value="<%= email %>"/><br />
-		<input type="submit" value="Submit" onclick="submit_clicked()" />
 		<input type="hidden" name="foods" />
+		<div class="input">
+			<input class="btn primary" type="submit" value="Submit" onclick="submit_clicked()" />
+		</div>
 	</form>
