@@ -52,6 +52,7 @@ function scheduleMessage() {
 	if (millis <= 0)
 		millis += 1000 * 60 * 60 * 24;
 	setTimeout(sendEmails, millis);
+	console.log(now.toLocaleString());
 }
 
 function sendEmails() {
