@@ -45,12 +45,15 @@
 			document.f.foods.value = val;
 		}
 		
-		 /*$(document).ready(function(){
-  		 	var data = "Core Selectors Attributes Traversing Manipulation CSS Events Effects Ajax Utilities".split(" ");
-  		 	alert('ehh');
+		 $(document).ready(function() {
+		 	var data = [];
+  		 	var options = document.f.globalfoods.options;
+  		 	for (var i = 0; i < options.length; i++) {
+  		 		data.push(options[i].value);
+  		 	}
 			$("#customtext").autocomplete(data);
-			alert("Autocomplete");
- 	 	});*/
+			
+ 	 	});
 	</script>
 	<div class="page-header">
 		<h1>Choose your foods</h1>
@@ -94,7 +97,7 @@
 		</div>
 		<label for="customtext">Type your own choices:</label>
 		<div class="input">
-			<input id="customtext" />
+			<input id="customtext" class="span5" />
 		</div>
 		<input type="hidden" name="email" value="<%= email %>"/><br />
 		<input type="hidden" name="foods" />

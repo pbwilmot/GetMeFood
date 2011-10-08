@@ -256,3 +256,4 @@ exports.unsubscribeGet = unsubscribeGet;
 exports.unsubscribePost = unsubscribePost;
 exports.editGet = editGet;
 exports.editPost = editPost;
+exports.getDailyMatches = getDailyMatches;

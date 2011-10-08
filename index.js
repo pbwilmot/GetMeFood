@@ -6,6 +6,7 @@ var url = require("url");
 var fs = require("fs");
 var requestHandlers = require("./requestHandlers");
 var express = require("express");
+var email = require("./email");
 
 var cookieSecret = "COOKIE MONSTER!!!!";
 
@@ -45,10 +46,41 @@ app.post("/edit", requestHandlers.editPost);
 app.get('/unsubscribe', requestHandlers.unsubscribeGet);
 app.post('/unsubscribe', requestHandlers.unsubscribePost);
 
-function startNotifications() {
-
+function scheduleMessage() {
+	var now = new Date();
+	var millis = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 7, 0, 0, 0).getTime() - now.getTime();
+	if (millis <= 0)
+		millis += 1000 * 60 * 60 * 24;
+	setTimeout(sendEmails, millis);
 }
 
-startNotifications();
+function sendEmails() {
+	menus.getRattyMenu(function(items) {
+		// TODO: Add items to global list
+		db.User.find({}, function(usererr, userdoc) {
+			if (usererr)
+				throw usererr;
+			console.log("Sending matches...");
+			
+			for (var i = 0; i < userdoc.length; i++) {
+				var matches = requestHandlers.getDailyMatches(userdoc[i], items);
+				var data = { hasBreakfast : (matches[0].length > 0),
+							hasLunch : (matches[1].length > 0),
+							hasDinner : (matches[2].length > 0),
+							breakfast : matches[0],
+							lunch : matches[1],
+							dinner: matches[2],
+							name : userdoc[i].name,
+							unsubscribeLink : "http://localhost:8080/unsubscribe?id=" + userdoc[i]._id };
+							
+				email.sendEmailWithTemplate(userdoc[i], "Today's Menu", "emailtemplate.txt", data, function(err, result) {});
+				console.log("message sent to " + userdoc[i].email);
+			}
+		});
+	});
+	scheduleMessage();
+}
+
+scheduleMessage();
 app.listen(8080);
 console.log("Express server listening on port %d in %s mode", app.address().port, app.settings.env);
