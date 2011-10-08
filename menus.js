@@ -53,7 +53,6 @@ function parseFoodList(foodText) {
 	while ((result = foodExp.exec(foodText)) != null) {
 		if (blank.exec(result[2]) == null) {// ignore &nbsp;
 			result[2] = result[2].replace("&amp;", "&"); 
-			result[2] = result[2].replace("\"", ""); // quotes would mess up the HTML, so get rid of them
 			list.push(result[2]);
 		}
 	}

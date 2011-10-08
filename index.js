@@ -5,57 +5,50 @@ var db = require("./db");
 var url = require("url");
 var fs = require("fs");
 var requestHandlers = require("./requestHandlers");
+var express = require("express");
 
-var handlers = {};
-handlers["/"] = requestHandlers.index;
-handlers["/index"] = requestHandlers.index;
-handlers["/subscribe"] = requestHandlers.subscribe;
-handlers["/clearusers"] = requestHandlers.clearusers;
-handlers["/clearfoods"] = requestHandlers.clearfoods;
-handlers["/rattymenu"] = requestHandlers.rattymenu;
-handlers["/listdb"] = requestHandlers.listdb;
-handlers["/emailmatches"] = requestHandlers.emailmatches;
-handlers["/matches"] = requestHandlers.matches;
-handlers["/unsubscribe"] = requestHandlers.unsubscribe;
-handlers["/edit"] = requestHandlers.edit;
+var cookieSecret = "COOKIE MONSTER!!!!";
 
-function startServer() {
-	var server = http.createServer(function(request, response) {
-		var pathname = url.parse(request.url).pathname;
-		var handler = handlers[pathname];
-		if (handler === undefined) {
-			response.writeHeader(404, "Content-type: text/plain");
-			response.write("Page not found");
-			response.end();
-		}
-		else {
-			var postData = "";
+// Configuration
 
-			request.setEncoding("utf8");
+var app = express.createServer();
 
-			request.addListener("data", function(postDataChunk) {
-				postData += postDataChunk;
-			});
+app.configure(function(){
+  app.set('views', __dirname + '/views');
+  app.set('view engine', 'ejs');
+  app.use(express.bodyParser());
+  app.use(express.methodOverride());
+  app.use(express.cookieParser());
+  app.use(express.session({secret: cookieSecret}));
+  app.use(app.router);
+  app.use(express.static(__dirname + '/public'));
+});
 
-			request.addListener("end", function() {
-				handler(pathname, request, response, postData);
-			});
-		}
-	});
-	server.listen(8080);
-	console.log("Server started on port 8080");
+app.configure('development', function(){
+  app.use(express.errorHandler({ dumpExceptions: true, showStack: true })); 
+});
+
+app.configure('production', function(){
+  app.use(express.errorHandler()); 
+});
+
+app.get("/", requestHandlers.index);
+app.get("/rattymenu", requestHandlers.rattymenu);
+app.get("/clearusers", requestHandlers.clearusers);
+app.get("/clearfoods", requestHandlers.clearfoods);
+app.get("/listdb", requestHandlers.listdb);
+app.get("/emailmatches", requestHandlers.emailmatches);
+app.get("/matches", requestHandlers.matches);
+app.get("/edit", requestHandlers.editGet);
+app.get("/subscribed", requestHandlers.subscribed);
+app.post("/edit", requestHandlers.editPost);
+app.get('/unsubscribe', requestHandlers.unsubscribeGet);
+app.post('/unsubscribe', requestHandlers.unsubscribePost);
+
+function startNotifications() {
+
 }
 
-startServer();
-/*getDailyMenu(function(itemFoods) {
-	var user = db.User.findOne({email:"victor_vu@brown.edu"}, function(err, doc) {
-		console.log(doc);
-		var matches = getDailyMatches(doc, itemFoods);
-		//console.log(matches);
-	});
-});*/
-/*var foods = db.getGlobalFoods(function(err, doc) {
-	console.log(doc);
-});*/
-
-
+startNotifications();
+app.listen(8080);
+console.log("Express server listening on port %d in %s mode", app.address().port, app.settings.env);

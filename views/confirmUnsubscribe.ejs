@@ -5,9 +5,8 @@
 	<body>
 		<h1>Unsubscribe</h1>
 		<form method="post" action="unsubscribe">
-			<p>{{name}}, are you sure you want to unsubscribe?</p>
-			<input type="hidden" name="id" value="{{_id}}" />
-			<input type="hidden" name="confirm" value="true" />
+			<p><%= user.name %>, are you sure you want to unsubscribe?</p>
+			<input type="hidden" name="id" value="<%= user._id %>" />
 			<input type="submit" value="Unsubscribe" />
 		</form>
 </html>

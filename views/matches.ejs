@@ -1,0 +1,38 @@
+<html>
+	<head>
+		<title>Food Matches</title>
+	</head>
+	<body>
+		<h1>Food Matches</h1>
+		<h2>Users</h2>
+			<ul>
+			<% for (var i = 0; i < users.length; i++) { %>
+				<li><code><%= JSON.stringify(users[i].user) %></code>
+					<ul>
+						<li>Breakfast
+							<ul>
+								<% for (var j = 0; j < users[i].bmatches.length; j++) { %>
+									<li><code><%= users[i].bmatches[j] %></code></li>
+								<% } %>
+							</ul>
+						</li>
+						<li>Lunch
+							<ul>
+								<% for (var j = 0; j < users[i].lmatches.length; j++) { %>
+									<li><code><%= users[i].lmatches[j] %></code></li>
+								<% } %>
+							</ul>
+						</li>
+						<li>Dinner
+							<ul>
+								<% for (var j = 0; j < users[i].dmatches.length; j++) { %>
+									<li><code><%= users[i].dmatches[j] %></code></li>
+								<% } %>
+							</ul>
+						</li>
+					</ul>
+				</code></li>
+			<% } %>
+			</ul>
+	</body>
+</html>

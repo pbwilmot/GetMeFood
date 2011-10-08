@@ -1,0 +1,9 @@
+<h1>Get Me Food!</h1>
+<form method="get" action="edit">
+	<% if (locals.error) { %>
+	<p><%= error %></p>
+	<% } %>
+	<p>What's your email address?</p>
+	<input type="text" name="email" length="20" text="<%= (locals.email ? email : "") %>"/>
+	<input type="submit" value="Go" />
+</form>
