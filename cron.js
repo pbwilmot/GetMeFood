@@ -43,7 +43,7 @@ function getDailyMatches(user, menufoods) {
 
 function scheduleMessages() {
 	var now = new Date();
-	var millis = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 7, 0, 0, 0).getTime() - now.getTime();
+	var millis = new Date(now.getFullYear(), now.getMonth(), now.getDate(), now.getHours(), 23, 0, 0).getTime() - now.getTime();
 	if (millis <= 0)
 		millis += 1000 * 60 * 60;
 	setTimeout(sendEmails, millis);
@@ -52,7 +52,7 @@ function scheduleMessages() {
 function sendEmails() {
 	scheduleMessages();
 	menus.getRattyMenu(function(items) {
-		// TODO: Add items to global list
+		db.addItems(items);
 		db.User.find({}, function(usererr, userdoc) {
 			if (usererr)
 				throw usererr;
