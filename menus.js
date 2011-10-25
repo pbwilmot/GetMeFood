@@ -3,7 +3,6 @@ var http = require("http");
 var ratty = '/Student_Services/Food_Services/eateries/refectory_menu.php';
 var vdub = '/Student_Services/Food_Services/eateries/verneywoolley_menu.php';
 
-
 var foodExp = /<td( width="[0-9]*")?>([^<]*)<\/td>/g;
 var blank = /\s*&nbsp;\s*/;
 var meal = /<h4>/g;
@@ -51,13 +50,18 @@ function parseFoodList(foodText) {
 	var result;
 	var list = [];
 	while ((result = foodExp.exec(foodText)) != null) {
-		if (blank.exec(result[2]) == null) {// ignore &nbsp;
+		if (result[2].indexOf('&nbsp') == -1) {// ignore &nbsp;
 			result[2] = result[2].replace("&amp;", "&"); 
-			list.push(result[2]);
+			// multiple items sometimes appear on the same line separated by commas
+			var splitResults = result[2].split(',');
+			for (var i = 0; i < splitResults.length; i++) {
+				list.push(splitResults[i]);
+			}
 		}
 	}
 	
 	// Put them in alphabetical order
+	// TODO: Probably not necessary
 	list.sort(function(a,b) {
 		return a.toLowerCase().localeCompare(b.toLowerCase());
 	});
@@ -67,6 +71,7 @@ function parseFoodList(foodText) {
 exports.getRattyMenu = function(callback) {
 	getMenu(ratty, callback);
 };
-/* This doesn't work yet exports.getVdubMenu = function(callback) {
+/* This doesn't work yet
+	exports.getVdubMenu = function(callback) {
 	getMenu(vdub, calllback);
 };*/

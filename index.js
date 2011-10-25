@@ -7,6 +7,7 @@ var fs = require("fs");
 var requestHandlers = require("./requestHandlers");
 var express = require("express");
 var email = require("./email");
+var cron = require('./cron');
 
 var cookieSecret = "COOKIE MONSTER!!!!";
 
@@ -38,50 +39,15 @@ app.get("/rattymenu", requestHandlers.rattymenu);
 app.get("/clearusers", requestHandlers.clearusers);
 app.get("/clearfoods", requestHandlers.clearfoods);
 app.get("/listdb", requestHandlers.listdb);
-app.get("/emailmatches", requestHandlers.emailmatches);
 app.get("/matches", requestHandlers.matches);
 app.get("/edit", requestHandlers.editGet);
 app.get("/subscribed", requestHandlers.subscribed);
 app.post("/edit", requestHandlers.editPost);
 app.get('/unsubscribe', requestHandlers.unsubscribeGet);
 app.post('/unsubscribe', requestHandlers.unsubscribePost);
+app.get('/autocomplete', requestHandlers.autocomplete);
 
-function scheduleMessage() {
-	var now = new Date();
-	var millis = new Date(now.getFullYear(), now.getMonth(), now.getDate(), now.getHours(), 5, 0, 0).getTime() - now.getTime();
-	console.log("Current time: " + now.toLocaleString());
-	if (millis <= 0)
-		millis += 1000 * 60 * 60;
-	setTimeout(sendEmails, millis);
-}
 
-function sendEmails() {
-	menus.getRattyMenu(function(items) {
-		// TODO: Add items to global list
-		db.User.find({}, function(usererr, userdoc) {
-			if (usererr)
-				throw usererr;
-			console.log("Sending matches...");
-			
-			for (var i = 0; i < userdoc.length; i++) {
-				var matches = requestHandlers.getDailyMatches(userdoc[i], items);
-				var data = { hasBreakfast : (matches[0].length > 0),
-							hasLunch : (matches[1].length > 0),
-							hasDinner : (matches[2].length > 0),
-							breakfast : matches[0],
-							lunch : matches[1],
-							dinner: matches[2],
-							name : userdoc[i].name,
-							unsubscribeLink : "http://localhost:8080/unsubscribe?id=" + userdoc[i]._id };
-							
-				email.sendEmailWithTemplate(userdoc[i], "Today's Menu", "emailtemplate.txt", data, function(err, result) {});
-				console.log("message sent to " + userdoc[i].email);
-			}
-		});
-	});
-	scheduleMessage();
-}
-
-scheduleMessage();
+//cron.scheduleMessages();
 app.listen(8080);
 console.log("Express server listening on port %d in %s mode", app.address().port, app.settings.env);

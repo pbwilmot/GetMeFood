@@ -1,24 +1,28 @@
-Hey {{name}},
+<html>
+	<body>
+		Hey {{name}},
 
-{{#hasBreakfast}}
-Breakfast:
-	{{#breakfast}}
-	{{.}}
-	{{/breakfast}}
-{{/hasBreakfast}}
+		{{#hasBreakfast}}
+		Breakfast:
+			{{#breakfast}}
+			{{.}}
+			{{/breakfast}}
+		{{/hasBreakfast}}
 
-{{#hasLunch}}
-Lunch:
-	{{#lunch}}
-	{{.}}
-	{{/lunch}}
-{{/hasLunch}}
+		{{#hasLunch}}
+		Lunch:
+			{{#lunch}}
+			{{.}}
+			{{/lunch}}
+		{{/hasLunch}}
 
-{{#hasDinner}}
-Dinner:
-	{{#dinner}}
-	{{.}}
-	{{/dinner}}
-{{/hasDinner}}
+		{{#hasDinner}}
+		Dinner:
+			{{#dinner}}
+			{{.}}
+			{{/dinner}}
+		{{/hasDinner}}
 
-<a href="{{unsubscribeLink}}">Unsubscribe</a>
+		<a href="{{unsubscribeLink}}">Unsubscribe</a>
+</body>
+</html>
