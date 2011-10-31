@@ -52,8 +52,8 @@ function parseFoodList(foodText) {
 	while ((result = foodExp.exec(foodText)) != null) {
 		if (result[2].indexOf('&nbsp') == -1) {// ignore &nbsp;
 			result[2] = result[2].replace("&amp;", "&"); 
-			// multiple items sometimes appear on the same line separated by commas
-			var splitResults = result[2].split(',');
+			// multiple items sometimes appear on the same line separated by commas or semicolons
+			var splitResults = result[2].split(/[;,]/);
 			for (var i = 0; i < splitResults.length; i++) {
 				list.push(splitResults[i]);
 			}

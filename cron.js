@@ -1,49 +1,31 @@
 var db = require("./db");
 var menus = require("./menus");
+var email = require("./email");
 
-function isMatch(foodpref, menuitem) {
-	// This can be however sophisticated we want
-	return menuitem.toLowerCase().indexOf(foodpref.toLowerCase()) != -1;
-}
 
-function getMealMatches(user, menufoods) {
-	var matches = [];
-	for (var i = 0; i < user.foods.length; i++) {
-		for (var j = 0; j < menufoods.length; j++) {
-			if (isMatch(menufoods[j], user.foods[i])) {
-				matches.push(menufoods[j]);
-			}
-		}
-	}
-	return matches;
-}
-
-function removeDuplicates(array) {
-	var set = {};
-	console.log("Before:\n" + JSON.stringify(array));
-	for (var i = 0; i < array.length; i++) {
-		set[array[i].toLowerCase()] = array[i];
-	}
-	var newArray = [];
-	for (var item in set) {
-		newArray.push(set[item]);
-	}
-	console.log("After:\n" + JSON.stringify(newArray));
-	return newArray;
-}
-
-function getDailyMatches(user, menufoods) {
-	var counter = 3;
+function getDailyMatches(user, callback) {
 	var mealMatches = [[],[],[]];
-	for (var i = 0; i < 3; i++) {
-		mealMatches[i] = getMealMatches(user, menufoods[i]);
+	var counter = user.foods.length;
+	for (var i = 0; i < user.foods.length; i++) {
+		console.log("searching for " + user.foods[i]);
+		db.MenuFood.find({keywords: { $all : db.parseKeywords(user.foods[i]) }}, function(err, doc) {
+			console.log(JSON.stringify(user.foods[i]) + ": " + JSON.stringify(doc));
+			if (err)
+				throw err;
+			if (doc.length > 0)
+				mealMatches[0] = doc.map(function(a) { return a.name; });
+			counter--;
+			if (counter == 0) {
+				callback(err, mealMatches);
+			}
+		});
 	}
 	return mealMatches;
 }
 
 function scheduleMessages() {
 	var now = new Date();
-	var millis = new Date(now.getFullYear(), now.getMonth(), now.getDate(), now.getHours(), 23, 0, 0).getTime() - now.getTime();
+	var millis = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 5, 0, 0, 0).getTime() - now.getTime();
 	if (millis <= 0)
 		millis += 1000 * 60 * 60;
 	setTimeout(sendEmails, millis);
@@ -52,30 +34,37 @@ function scheduleMessages() {
 function sendEmails() {
 	scheduleMessages();
 	menus.getRattyMenu(function(items) {
-		db.addItems(items);
-		db.User.find({}, function(usererr, userdoc) {
-			if (usererr)
-				throw usererr;
-			console.log("Sending matches...");
+		db.setMenu(items, function(err) {
+			db.User.find({}, function(usererr, userdoc) {
+				if (usererr)
+					throw usererr;
+				console.log("Sending matches...");
 			
-			for (var i = 0; i < userdoc.length; i++) {
-				var matches = requestHandlers.getDailyMatches(userdoc[i], items);
-				var data = { hasBreakfast : (matches[0].length > 0),
-							hasLunch : (matches[1].length > 0),
-							hasDinner : (matches[2].length > 0),
-							breakfast : matches[0],
-							lunch : matches[1],
-							dinner: matches[2],
-							name : userdoc[i].name,
-							unsubscribeLink : "http://localhost:8080/unsubscribe?id=" + userdoc[i]._id };
+				for (var i = 0; i < userdoc.length; i++) {
+					(function(index) {
+						getDailyMatches(userdoc[index], function(err, matches) {
+							var data = { hasBreakfast : (matches[0].length > 0),
+										hasLunch : (matches[1].length > 0),
+										hasDinner : (matches[2].length > 0),
+										breakfast : matches[0],
+										lunch : matches[1],
+										dinner: matches[2],
+										name : userdoc[index].name,
+										unsubscribeLink : "http://localhost:8080/unsubscribe?id=" + userdoc[index]._id };
 							
-				email.sendEmailWithTemplate(userdoc[i], "Today's Menu", "emailtemplate.txt", data, function(err, result) {});
-				console.log("message sent to " + userdoc[i].email);
-			}
+							if (data.hasBreakfast || data.hasLunch || data.hasDinner) {
+								email.sendEmailWithTemplate(userdoc[index], "Today's Menu", "emailtemplate.txt", data, function(err, result) {});
+								console.log("message sent to " + userdoc[index].email);
+							}
+							else
+								console.log("no matches for " + userdoc[index].email);
+						});
+					})(i);
+				}
+			});
 		});
 	});
 }
 
 exports.scheduleMessages = scheduleMessages;
-exports.removeDuplicates = removeDuplicates;
 exports.getDailyMatches = getDailyMatches;

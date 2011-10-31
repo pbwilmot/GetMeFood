@@ -8,6 +8,7 @@ function subscribed(req, res) {
 	res.render("subscribed", {name: req.param('name'), email: req.param('email')});
 }
 
+// TODO: Break this function down
 function editPost(req, res) {
 	var errors = [];
 	db.User.findOne({email: req.param('email')}, function(err, doc) {
@@ -26,8 +27,9 @@ function editPost(req, res) {
 		if (foodstring === undefined || foodstring.length === 0) {
 			foods = [];
 		}
-		else
+		else {
 			foods = foodstring.split(",");
+		}
 
 		user.name = req.param('name');
 		if (user.name === undefined || user.name.length == 0)
@@ -50,7 +52,7 @@ function editPost(req, res) {
 		}
 		else {
 			// Redisplay the form and list the errors
-			db.Food.find({}, function(fooderr, fooddoc) {
+			db.GlobalFood.find({}, function(fooderr, fooddoc) {
 				if (fooderr)
 					throw fooderr;
 				res.render('edit', {globalfoods : fooddoc, email : user.email, userfoods: user.foods, username: user.name, errors: errors});
@@ -65,12 +67,8 @@ function validateEmail(addr) {
 }
 
 function autocomplete(req, res) {
-	db.Food.find({}, function(err, docs) {
-		var n = docs.length;
-		var doc1 = docs[Math.floor(Math.random() * n)];
-		var doc2 = docs[Math.floor(Math.random() * n)];
-		var doc3 = docs[Math.floor(Math.random() * n)];
-		res.send(JSON.stringify([doc1.name,doc2.name,doc3.name]));
+	db.matchKeywords(req.param('query'), db.GlobalFood, function(err, docs) {
+		res.send(JSON.stringify(docs.map(function(doc) { return doc.name })));
 	});
 }
 
@@ -82,9 +80,9 @@ function editGet(req, res) {
 		res.render("index", {email : emailAddr, error: 'Please enter a valid email address'});
 	}
 	else {
-		db.Food.find({}, function(fooderr, fooddoc) {
+		db.GlobalFood.find({}, function(fooderr, fooddoc) {
 			db.User.findOne({email: emailAddr}, function(usererr, userdoc) {
-				var userfoods = {};
+				var userfoods = [];
 				var username = "";
 				if (userdoc != null) {
 					userfoods = userdoc.foods;
@@ -136,45 +134,39 @@ function unsubscribePost(req, res) {
 }
 
 function listdb(req, res) {
-	db.Food.find({}, function(fooderr, fooddoc) {
-		db.User.find({}, function(usererr, userdoc) {
-			var userstrings = [];
-			for (var i = 0; i < userdoc.length; i++) {
-				userstrings.push(JSON.stringify(userdoc[i]));
-			}
-			var foodstrings = [];
-			for (var i = 0; i < fooddoc.length; i++) {
-				foodstrings.push(JSON.stringify(fooddoc[i]));
-			}
-			res.render("listdb", {users: userstrings, foods: foodstrings});
+	db.GlobalFood.find({}, function(fooderr, globalfooddoc) {
+		db.MenuFood.find({}, function(fooderr, menufooddoc) {
+			db.User.find({}, function(usererr, userdoc) {
+				res.render("listdb", {users: userdoc.map(JSON.stringify), globalfoods: globalfooddoc.map(JSON.stringify), menufoods: menufooddoc.map(JSON.stringify) });
+			});
 		});
 	});
 }
 
-function isMatch(foodpref, menuitem) {
-	// This can be however sophisticated we want
-	return menuitem.toLowerCase().indexOf(foodpref.toLowerCase()) != -1;
-}
-
 function matches(req, res) {
-	menus.getRattyMenu(function(items) {
-		db.User.find({}, function(usererr, userdoc) {
-			if (usererr)
-				throw usererr;
-			var userlist = [];
-			for (var i = 0; i < userdoc.length; i++) {
-				var matches = cron.getDailyMatches(userdoc[i], items);
-				userlist.push({user: userdoc[i], bmatches: matches[0], lmatches: matches[1], dmatches: matches[2]});
-			}
-			res.render('matches', {users: userlist});
-		});
+	db.User.find({}, function(usererr, userdoc) {
+		if (usererr)
+			throw usererr;
+		var userlist = [];
+		var counter = userdoc.length;
+		for (var i = 0; i < userdoc.length; i++) {
+			(function(index) {
+				cron.getDailyMatches(userdoc[index], function(err, matches) {
+					userlist.push({user: userdoc[index], bmatches: matches[0], lmatches: matches[1], dmatches: matches[2]});
+					counter--;
+					if (counter == 0)
+						res.render('matches', {users: userlist});
+				});
+			})(i);
+		}
 	});
 }
 
 function rattymenu(req, res) {
 	menus.getRattyMenu(function(items) {
-		db.addItems(items);
-		res.render("ratty", {breakfast: items[0], lunch: items[1], dinner: items[2]});
+		db.setMenu(items, function(err) {
+			res.render("ratty", {breakfast: items[0], lunch: items[1], dinner: items[2]});
+		});
 	});
 }
 

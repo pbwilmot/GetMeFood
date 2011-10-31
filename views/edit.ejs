@@ -1,4 +1,25 @@
 <script type="text/javascript">
+
+		function addCustom() {
+			var val = $("#customtext").val();
+			if (val.length > 0) {
+				// now checkk if we've already added it
+				var chosen = document.f.foodchoices.options;
+				var found = false;
+				for (var j = 0; j < chosen.length; j++) {
+					if (chosen[j].value === val) {
+						found = true;
+						break;
+					}
+				}
+				if (!found) {
+					var opt = document.createElement("option");
+					opt.text = val;
+					opt.value = val;
+					chosen.add(opt);
+				}
+			}
+		}
 		function add_clicked() {
 			var options = document.f.globalfoods.options;
 			for (var i = 0; i < options.length; i++) {
@@ -46,8 +67,13 @@
 		}
 		
 		function suggestFoods() {
-			$.get('/autocomplete', {}, function(data) {
-				$('suggestedfoods').html(data);
+			$.get('/autocomplete', {query : $("#customtext").val()}, function(data) {
+				var html = "<p>No matches found</p>";
+				var foods = JSON.parse(data);
+				if (foods.length != 0) {
+					html = "<p>Matches:</p><ul><li>" + foods.join('</li><li>') + "</li></ul>";
+				}
+				$('#suggestedfoods').html(html);
 			});
 		}
 		
@@ -55,7 +81,7 @@
 	<div class="page-header">
 		<h1>Choose your foods</h1>
 	</div>
-	<form name="f" method="post" action="edit">
+	<form name="f" method="post" action="edit" class="form-stacked">
 		<% if (errors.length > 0) { %>
 		<div class="alert-message block-message error">
 		<p><strong>There were some errors</strong>
@@ -67,41 +93,51 @@
 		</p>
 		</div>
 		<% } %>
-		<label for="name">What's your name:</label>
-		<div class="input">
-			<input class="xlarge span5" type="text" id="name" name="name" value="<%= username %>" />
+		<div class="row">
+			<div class="span8">
+				<label for="name">What's your name:</label>
+				<div>
+					<input class="xlarge span5" type="text" id="name" name="name" value="<%= username %>" />
+				</div>
+				<label for="customtext">Type your own choices:</label>
+				<div>
+					<input type="text" id="customtext" class="xlarge span5" onkeyup="suggestFoods()" />
+					<input type="button" class="btn" value="Add" id="addcustom" onclick="addCustom()" />
+				</div>
+				<div id="suggestedfoods">
+					<p>No matches found</p>
+				</div>
+				<label for="globalfoods">Choose your favorite foods:</label>
+				<div>
+					<select class="span5" multiple id="globalfoods" name="globalfoods" size="15">
+						<% for (var i = 0; i < globalfoods.length; i++) { %>
+						<option value="<%= globalfoods[i].name %>"><%= globalfoods[i].name %></option>
+						<% } %>
+					</select>
+				</div>
+				<div>
+					<input type="button" value="Add" name="add" onclick="add_clicked()" class="btn" />
+					<input type="button" value="Remove" name="remove" onclick="remove_clicked()" class="btn" />
+				</div>
+			</div>
+			<div class="span7">
+				<label for="foodchoices">Your selected foods:</label>
+				<div>
+					<select class="span5" multiple id="foodchoices" name="foodchoices" size="10">
+						<% for (var i = 0; i < userfoods.length; i++) { %>
+							<option name="foodchoices" value="<%= userfoods[i] %>"><%= userfoods[i] %></option>
+						<% } %>
+					</select>
+				</div>
+			</div>
 		</div>
-		</p>
-		<label for="globalfoods">Choose your favorite foods:</label>
-		<div class="input">
-			<select class="span5" multiple id="globalfoods" name="globalfoods" size="15">
-				<% for (var i = 0; i < globalfoods.length; i++) { %>
-				<option value="<%= globalfoods[i].name %>"><%= globalfoods[i].name %></option>
-				<% } %>
-			</select>
-		</div>
-		<div class="input">
-			<input type="button" value="Add" name="add" onclick="add_clicked()" class="btn" />
-			<input type="button" value="Remove" name="remove" onclick="remove_clicked()" class="btn" />
-		</div>
-		<label for="foodchoices">Your selected foods:</label>
-		<div class="input">
-			<select class="span5" multiple id="foodchoices" name="foodchoices" size="10">
-				<% for (var i = 0; i < userfoods.length; i++) { %>
-					<option name="foodchoices" value="<%= userfoods[i] %>"><%= userfoods[i] %></option>
-				<% } %>
-			</select>
-		</div>
-		<label for="customtext">Type your own choices:</label>
-		<div class="input">
-			<input type="text" id="customtext" class="span5" onchange="suggestFoods()" />
-		</div>
-		<div id="suggestedfoods">
-		
-		</div>
-		<input type="hidden" name="email" value="<%= email %>"/><br />
-		<input type="hidden" name="foods" />
-		<div class="input">
-			<input class="btn primary" type="submit" value="Submit" onclick="submit_clicked()" />
+		<div class="row">
+			<div class="span16">
+				<input type="hidden" name="email" value="<%= email %>"/><br />
+				<input type="hidden" name="foods" />
+				<div>
+					<input class="btn primary" type="submit" value="Submit" onclick="submit_clicked()" />
+				</div>
+			</div>
 		</div>
 	</form>

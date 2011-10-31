@@ -1,28 +1,40 @@
 <html>
 	<body>
-		Hey {{name}},
+		<p><strong>Hey {{name}}, the Ratty has some good food today!</strong></p>
 
 		{{#hasBreakfast}}
+		<p>
 		Breakfast:
+			<ul>
 			{{#breakfast}}
-			{{.}}
+			<li>{{.}}</li>
 			{{/breakfast}}
+			</ul>
+		</p>
 		{{/hasBreakfast}}
 
 		{{#hasLunch}}
+		<p>
 		Lunch:
+			<ul>
 			{{#lunch}}
-			{{.}}
+			<li>{{.}}</li>
 			{{/lunch}}
+			</ul>
+		</p>
 		{{/hasLunch}}
 
 		{{#hasDinner}}
+		<p>
 		Dinner:
+			<ul>
 			{{#dinner}}
-			{{.}}
+			<li>{{.}}</li>
 			{{/dinner}}
+			</ul>
+		</p>
 		{{/hasDinner}}
 
-		<a href="{{unsubscribeLink}}">Unsubscribe</a>
+		<p><a href="{{unsubscribeLink}}">Unsubscribe</a></p>
 </body>
 </html>
