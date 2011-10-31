@@ -180,11 +180,14 @@ function clearusers(req, res) {
 }
 
 function clearfoods(req, res) {
-	db.Food.remove({}, function(err, doc) {
+	db.GlobalFood.remove({}, function(err, doc) {
 		if (!err)
-			res.send("All foods cleared");
+			res.send("All global foods cleared");
 		else
 			res.send(err);
+	});
+	db.MenuFood.remove({}, function(err, doc) {
+		
 	});
 }
 
