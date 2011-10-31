@@ -27,7 +27,9 @@ function scheduleMessages() {
 	var now = new Date();
 	var millis = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 5, 0, 0, 0).getTime() - now.getTime();
 	if (millis <= 0)
-		millis += 1000 * 60 * 60;
+		millis += 1000 * 60 * 60 * 24;
+	
+	console.log("scheduling for " + millis);
 	setTimeout(sendEmails, millis);
 }
 
