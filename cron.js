@@ -12,8 +12,11 @@ function getDailyMatches(user, callback) {
 			console.log(JSON.stringify(user.foods[i]) + ": " + JSON.stringify(doc));
 			if (err)
 				throw err;
-			if (doc.length > 0)
-				mealMatches[0] = doc.map(function(a) { return a.name; });
+			if (doc.length > 0) {
+				mealMatches[0] = doc.filter(function(a) { return a.breakfast }).map(function(a) { return a.name });
+				mealMatches[1] = doc.filter(function(a) { return a.lunch }).map(function(a) { return a.name });		
+				mealMatches[2] = doc.filter(function(a) { return a.dinner }).map(function(a) { return a.name });			
+			}
 			counter--;
 			if (counter == 0) {
 				callback(err, mealMatches);
@@ -28,8 +31,6 @@ function scheduleMessages() {
 	var millis = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 5, 0, 0, 0).getTime() - now.getTime();
 	if (millis <= 0)
 		millis += 1000 * 60 * 60 * 24;
-	
-	console.log("scheduling for " + millis);
 	setTimeout(sendEmails, millis);
 }
 
@@ -69,4 +70,5 @@ function sendEmails() {
 }
 
 exports.scheduleMessages = scheduleMessages;
+exports.sendEmails = sendEmails;
 exports.getDailyMatches = getDailyMatches;

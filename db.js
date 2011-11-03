@@ -7,7 +7,7 @@ var User = new Schema({
 	name : String,
 	email : String,
 	foods : [ String ]
-});
+}).index({email:1});
 
 var MenuFood = new Schema({
 	name : String,
@@ -30,13 +30,13 @@ GlobalFood = mongoose.model("GlobalFood", GlobalFood);
 MenuFood = mongoose.model("MenuFood", MenuFood);
 User = mongoose.model("User", User);
 
-var ignoredWords = ['on', 'w', 'with', 'dessert', 'a', 'to', 'the', 'and'];
+var ignoredWords = ['on', 'w', 'with', 'dessert', 'a', 'to', 'the', 'and', 'in'];
 var ignore = {};
 for (var i = 0; i < ignoredWords.length; i++) {
 	ignore[ignoredWords[i]] = true;
 }
 
-var synonyms = {'sr' : 'sour', 'mac' : 'macaroni'};
+var synonyms = {'sr' : 'sour', 'mac' : 'macaroni', 'rasp' : 'raspberry' };
 
 // expects a list of three String arrays: breakfast, lunch, and dinner menus
 function addItems(itemList, collection, callback) {
@@ -46,8 +46,14 @@ function addItems(itemList, collection, callback) {
 			// now add this i
 			var kw = parseKeywords(itemList[i][j]);
 			var food = { name : itemList[i][j], keywords : kw };
+			if (i == 0)
+				food.breakfast = true;
+			else if (i == 1)
+				food.lunch = true;
+			else
+				food.dinner = true;
 			var prominence = j / itemList[i].length;
-			collection.update({keywords : {$all : kw}}, {$set : food, $inc : { occurrence : 1, score : prominence }}, {upsert: true}, function(err, doc) {
+			collection.update({keywords : {$all : kw, $size : kw.length }}, {$set : food, $inc : { occurrence : 1, score : prominence }}, {upsert: true}, function(err, doc) {
 				if (err)
 					throw err;
 				counter--;
@@ -69,7 +75,6 @@ function setMenu(itemList, callback) {
 	MenuFood.remove({}, function(err) {
 		addItems(itemList, MenuFood, func);
 	});
-	// TODO: Set breakfast, lunch, dinner for each MenuFood item
 }
 
 function parseKeywords(itemName) {

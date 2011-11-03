@@ -101,13 +101,13 @@
 				</div>
 				<label for="customtext">Type your own choices:</label>
 				<div>
-					<input type="text" id="customtext" class="xlarge span5" onkeyup="suggestFoods()" />
+					<input type="text" id="customtext" class="xlarge span5" onkeyup="suggestFoods()" autocomplete="off" />
 					<input type="button" class="btn" value="Add" id="addcustom" onclick="addCustom()" />
 				</div>
 				<div id="suggestedfoods">
 					<p>No matches found</p>
 				</div>
-				<label for="globalfoods">Choose your favorite foods:</label>
+				<!-- <label for="globalfoods">Choose your favorite foods:</label>
 				<div>
 					<select class="span5" multiple id="globalfoods" name="globalfoods" size="15">
 						<% for (var i = 0; i < globalfoods.length; i++) { %>
@@ -117,8 +117,7 @@
 				</div>
 				<div>
 					<input type="button" value="Add" name="add" onclick="add_clicked()" class="btn" />
-					<input type="button" value="Remove" name="remove" onclick="remove_clicked()" class="btn" />
-				</div>
+				</div>-->
 			</div>
 			<div class="span7">
 				<label for="foodchoices">Your selected foods:</label>
@@ -127,7 +126,8 @@
 						<% for (var i = 0; i < userfoods.length; i++) { %>
 							<option name="foodchoices" value="<%= userfoods[i] %>"><%= userfoods[i] %></option>
 						<% } %>
-					</select>
+					</select><br />
+					<input type="button" value="Remove" name="remove" onclick="remove_clicked()" class="btn" />
 				</div>
 			</div>
 		</div>
