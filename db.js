@@ -72,6 +72,21 @@ function addItems(itemList, collection, callback) {
 	}
 }
 
+// Utility method
+// Recreates the global food list based on the existing names
+// This can adjust for changes in the schema without discarding all foods that have been entered
+function updateGlobal() {
+	GlobalFood.find({}, function(err, docs) {
+		// TODO: Remove occurrence field
+		for (var i = 0; i < docs.length; i++) {
+			docs[i].keywords = parseKeywords(docs[i].name);
+			docs[i].frequency = 0;
+			docs[i].score = 0;
+			docs[i].save();
+		}
+	});
+}
+
 // Clears the previous MenuFood and loads it with a new menu. Also adds all new menu items to GlobalFood
 // itemList: a list of three String arrays: breakfast, lunch, and dinner menus, where each menu is an array of raw strings containing menu items
 // callback: a function(err) that is called when this function completes
@@ -166,3 +181,4 @@ exports.GlobalFood = GlobalFood;
 exports.setMenu = setMenu;
 exports.matchKeywords = matchKeywords;
 exports.parseKeywords = parseKeywords;
+exports.updateGlobal = updateGlobal;

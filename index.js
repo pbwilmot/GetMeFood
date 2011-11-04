@@ -47,7 +47,7 @@ app.get('/unsubscribe', requestHandlers.unsubscribeGet);
 app.post('/unsubscribe', requestHandlers.unsubscribePost);
 app.get('/autocomplete', requestHandlers.autocomplete);
 
-
+db.updateGlobal();
 cron.scheduleMessages();
 app.listen(8080);
 console.log("Express server listening on port %d in %s mode", app.address().port, app.settings.env);
