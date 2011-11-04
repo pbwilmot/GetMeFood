@@ -15,14 +15,14 @@ var MenuFood = new Schema({
 	breakfast : Boolean,
 	lunch : Boolean,
 	dinner : Boolean,
-	occurrence : Number,
+	frequency : Number,
 	keywords : [String]
 }).index({keywords:1});
 
 var GlobalFood = new Schema({
 	name : String,
 	score : Number,
-	occurrence : Number,
+	frequency : Number,
 	keywords : [String]
 }).index({keywords:1});
 
@@ -38,9 +38,13 @@ for (var i = 0; i < ignoredWords.length; i++) {
 
 var synonyms = {'sr' : 'sour', 'mac' : 'macaroni', 'rasp' : 'raspberry' };
 
-// expects a list of three String arrays: breakfast, lunch, and dinner menus
+// Adds a list of foods to a given collection in the database
+// itemList: a list of three String arrays: breakfast, lunch, and dinner menus, with no processing done on the individual menu item strings
+// collection: which food collection to add it too (GlobalFood or MenuFood)
+// callback: a function(err) which is called when this function completes
 function addItems(itemList, collection, callback) {
 	var counter = itemList[0].length + itemList[1].length + itemList[2].length;
+	var stop = false;
 	for (var i = 0; i < itemList.length; i++) {
 		for (var j = 0; j < itemList[i].length; j++) {
 			// now add this i
@@ -53,30 +57,52 @@ function addItems(itemList, collection, callback) {
 			else
 				food.dinner = true;
 			var prominence = j / itemList[i].length;
-			collection.update({keywords : {$all : kw, $size : kw.length }}, {$set : food, $inc : { occurrence : 1, score : prominence }}, {upsert: true}, function(err, doc) {
-				if (err)
-					throw err;
-				counter--;
-				if (counter == 0)
+			collection.update({keywords : {$all : kw, $size : kw.length }}, {$set : food, $inc : { frequency : 1, score : prominence }}, {upsert: true}, function(err) {
+				if (err && !stop) {
+					stop = true;
 					callback(err);
+				}
+				if (!stop) {
+					counter--;
+					if (counter == 0)
+						callback(null);
+				}
 			});
 		}
 	}
 }
 
+// Clears the previous MenuFood and loads it with a new menu. Also adds all new menu items to GlobalFood
+// itemList: a list of three String arrays: breakfast, lunch, and dinner menus, where each menu is an array of raw strings containing menu items
+// callback: a function(err) that is called when this function completes
 function setMenu(itemList, callback) {
 	var counter = 2;
+	var stop = false;
 	var func = function(err) {
-		counter--;
-		if (counter == 0)
+		if (err && !stop) {
+			stop = true;
 			callback(err);
+		}
+		if (!stop) {
+			counter--;
+			if (counter == 0)
+				callback(null);
+		}
 	};
 	addItems(itemList, GlobalFood, func);
 	MenuFood.remove({}, function(err) {
-		addItems(itemList, MenuFood, func);
+		if (err && !stop) {
+			stop = true;
+			callback(err);
+		}
+		if (!stop)
+			addItems(itemList, MenuFood, func);
 	});
 }
 
+// Parses a raw menu item string into a list of keywords. Returns the list of keywords as an array of strings
+// For example, 'mac and cheese' would be become ['macaroni',cheese']
+// itemName: a string containing the item to parse
 function parseKeywords(itemName) {
 	var pattern = /[\w\'-]+/g;
 	var word;
@@ -93,9 +119,38 @@ function parseKeywords(itemName) {
 	return keywords;
 }
 
+// Gets all global foods that match a given string
+// searchStr: The string to parse into keywords and search for
+// collection: The collection to search; either MenuFood or GlobalFood
+// callback: a function(doc, err) containing the results
 function matchKeywords(searchStr, collection, callback) {
+	/*var kw = parseKeywords(searchStr);
+	collection.find({keywords : {$all : kw}}, callback);*/
 	var kw = parseKeywords(searchStr);
-	GlobalFood.find({keywords : {$all : kw}}, callback);
+	var partial = null;
+	var cond = {};
+	if (kw.length > 0) {
+		partial = kw.pop();
+	}
+	if (kw.length > 0)
+		cond = {keywords : {$all : kw}};
+	collection.find(cond, function(err, doc) {
+		if (err) {
+			callback(err, null);
+			return;
+		}
+		if (partial != null) {
+			doc = doc.filter(function (a) {
+				for (var i = 0; i < a.keywords.length; i++) {
+					if (a.keywords[i].indexOf(partial) == 0) {
+						return true;
+					}
+				}
+				return false;
+			});
+		}
+		callback(null, doc);
+	});
 }
 
 exports.User = User;
