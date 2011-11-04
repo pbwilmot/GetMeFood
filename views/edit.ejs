@@ -4,19 +4,9 @@
 			var val = $("#customtext").val();
 			if (val.length > 0) {
 				// now checkk if we've already added it
-				var chosen = document.f.foodchoices.options;
-				var found = false;
-				for (var j = 0; j < chosen.length; j++) {
-					if (chosen[j].value === val) {
-						found = true;
-						break;
-					}
-				}
-				if (!found) {
-					var opt = document.createElement("option");
-					opt.text = val;
-					opt.value = val;
-					chosen.add(opt);
+				if ($.inArray(val, chosenFoods) == -1) {
+					chosenFoods.push(val);
+					$("#selectedfoods").append("<li>" + val + "</li>");
 				}
 			}
 		}
@@ -55,15 +45,10 @@
 			}
 		}
 		
+		var chosenFoods = <%- JSON.stringify(userfoods) %>;
+		
 		function submit_clicked() {
-			var val = "";
-			var options = document.f.foodchoices.options;
-			for (var i = 0; i < options.length; i++) {
-				if (i != 0)
-					val += ",";
-				val += options[i].value;
-			}
-			document.f.foods.value = val;
+			document.f.foods.value = chosenFoods.join(',');
 		}
 		
 		function suggestFoods() {
@@ -104,31 +89,18 @@
 					<input type="text" id="customtext" class="xlarge span5" onkeyup="suggestFoods()" autocomplete="off" />
 					<input type="button" class="btn" value="Add" id="addcustom" onclick="addCustom()" />
 				</div>
-				<div id="suggestedfoods">
+				<div id="suggestedfoods" style="height: 16em">
 					<p>No matches found</p>
 				</div>
-				<!-- <label for="globalfoods">Choose your favorite foods:</label>
-				<div>
-					<select class="span5" multiple id="globalfoods" name="globalfoods" size="15">
-						<% for (var i = 0; i < globalfoods.length; i++) { %>
-						<option value="<%= globalfoods[i].name %>"><%= globalfoods[i].name %></option>
-						<% } %>
-					</select>
-				</div>
-				<div>
-					<input type="button" value="Add" name="add" onclick="add_clicked()" class="btn" />
-				</div>-->
 			</div>
 			<div class="span7">
-				<label for="foodchoices">Your selected foods:</label>
-				<div>
-					<select class="span5" multiple id="foodchoices" name="foodchoices" size="10">
+				<p>Your selected foods:</p>
+				<ul id="selectedfoods">
 						<% for (var i = 0; i < userfoods.length; i++) { %>
-							<option name="foodchoices" value="<%= userfoods[i] %>"><%= userfoods[i] %></option>
+							<li><%= userfoods[i] %></li>
 						<% } %>
-					</select><br />
-					<input type="button" value="Remove" name="remove" onclick="remove_clicked()" class="btn" />
-				</div>
+				</ul><br />
+				<input type="button" value="Remove" name="remove" onclick="remove_clicked()" class="btn" />
 			</div>
 		</div>
 		<div class="row">
