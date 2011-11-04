@@ -30,13 +30,13 @@ GlobalFood = mongoose.model("GlobalFood", GlobalFood);
 MenuFood = mongoose.model("MenuFood", MenuFood);
 User = mongoose.model("User", User);
 
-var ignoredWords = ['on', 'w', 'with', 'dessert', 'a', 'to', 'the', 'and', 'in'];
+var ignoredWords = [];//['on', 'w', 'with', 'dessert', 'a', 'to', 'the', 'and', 'in'];
 var ignore = {};
 for (var i = 0; i < ignoredWords.length; i++) {
 	ignore[ignoredWords[i]] = true;
 }
 
-var synonyms = {'sr' : 'sour', 'mac' : 'macaroni', 'rasp' : 'raspberry' };
+var synonyms = {'sr' : 'sour', 'mac' : 'macaroni', 'rasp' : 'raspberry' , '&' : 'and'};
 
 // Adds a list of foods to a given collection in the database
 // itemList: a list of three String arrays: breakfast, lunch, and dinner menus, with no processing done on the individual menu item strings
@@ -104,7 +104,7 @@ function setMenu(itemList, callback) {
 // For example, 'mac and cheese' would be become ['macaroni',cheese']
 // itemName: a string containing the item to parse
 function parseKeywords(itemName) {
-	var pattern = /[\w\'-]+/g;
+	var pattern = /[&\w\'-]+/g;
 	var word;
 	var keywords = [];
 	while ((word = pattern.exec(itemName)) != null) {
@@ -127,11 +127,13 @@ function matchKeywords(searchStr, collection, callback) {
 	/*var kw = parseKeywords(searchStr);
 	collection.find({keywords : {$all : kw}}, callback);*/
 	var kw = parseKeywords(searchStr);
-	var partial = null;
-	var cond = {};
-	if (kw.length > 0) {
-		partial = kw.pop();
+	if (kw.length == 0) {
+		// Return empty for an empty string instead of returning everything
+		callback(null, []);
+		return;
 	}
+	var partial = kw.pop();
+	var cond = {};
 	if (kw.length > 0)
 		cond = {keywords : {$all : kw}};
 	collection.find(cond, function(err, doc) {
@@ -140,14 +142,19 @@ function matchKeywords(searchStr, collection, callback) {
 			return;
 		}
 		if (partial != null) {
-			doc = doc.filter(function (a) {
-				for (var i = 0; i < a.keywords.length; i++) {
-					if (a.keywords[i].indexOf(partial) == 0) {
-						return true;
+			var newdoc = [];
+			// Only include results with the partial keyword, up to a max of 10
+			for (var i = 0; i < doc.length; i++) {
+				for (var j = 0; j < doc[i].keywords.length; j++) {
+					if (doc[i].keywords[j].lastIndexOf(partial, 0) == 0) { // lastIndexOf is more efficient than indexOf for this case
+						newdoc.push(doc[i]);
+						break;
 					}
-				}
-				return false;
-			});
+				}	
+				if (newdoc.length == 10)
+					break;
+			}
+			doc = newdoc;
 		}
 		callback(null, doc);
 	});
