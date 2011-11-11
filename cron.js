@@ -5,7 +5,7 @@ var email = require("./email");
 // Gets a list of all foods on today's menu that match a user's favorites
 // user: The User to match
 // callback: a function(err, doc) to call when results are in, where doc is a list of three String arrays containing the breakfast, lunch, and dinner matches.
-// Each match is itself just a String. So this might return something like [['pancakes', 'scrambles eggs'], [], ['macaroni and cheese']]
+// Each match is itself just a String. So this might return something like [['pancakes', 'scrambled eggs'], [], ['macaroni and cheese']]
 function getDailyMatches(user, callback) {
 	console.log("Getting matches for " + user.email);
 	var mealMatches = [[],[],[]];
@@ -36,7 +36,7 @@ function getDailyMatches(user, callback) {
 // Schedules a round of emails to be sent at 5AM (either today or tomorrow, depending on the time)
 function scheduleMessages() {
 	var now = new Date();
-	var millis = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 5, 0, 0, 0).getTime() - now.getTime();
+	var millis = new Date(now.getFullYear(), now.getMonth(), now.getDate(), now.getHours(), 39, 0, 0).getTime() - now.getTime();
 	if (millis <= 0) // It's after 5AM today, so make it tomorrow
 		millis += 1000 * 60 * 60 * 24;
 	setTimeout(sendEmails, millis);

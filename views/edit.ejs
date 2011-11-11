@@ -105,7 +105,10 @@
 		</div>
 		<div class="row">
 			<div class="span16">
-				<input type="hidden" name="email" value="<%= email %>"/><br />
+					<label><input type="checkbox" name="meals" value="breakfast" />Breakfast</label>
+					<label><input type="checkbox" name="meals" value="lunch" />Lunch</label>
+					<label><input type="checkbox" name="meals" value="dinner" />Dinner</label>
+				<input type="hidden" name="email" value="<%= email %>"/>
 				<input type="hidden" name="foods" />
 				<div>
 					<input class="btn primary" type="submit" value="Submit" onclick="submit_clicked()" />
