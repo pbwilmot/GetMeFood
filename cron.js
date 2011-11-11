@@ -51,7 +51,7 @@ function sendEmails() {
 		// TODO: Handle errors from getRattyMenu
 		console.log("Retrieved Ratty menu");
 		db.setMenu(items, function(menuerr) {
-			if (err) {
+			if (menuerr) {
 				console.log("Could not set menu: " + menuerr);
 				return;
 			}
