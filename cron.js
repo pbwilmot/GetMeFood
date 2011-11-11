@@ -36,7 +36,7 @@ function getDailyMatches(user, callback) {
 // Schedules a round of emails to be sent at 5AM (either today or tomorrow, depending on the time)
 function scheduleMessages() {
 	var now = new Date();
-	var millis = new Date(now.getFullYear(), now.getMonth(), now.getDate(), now.getHours(), 39, 0, 0).getTime() - now.getTime();
+	var millis = new Date(now.getFullYear(), now.getMonth(), now.getDate(), now.getHours(), 42, 0, 0).getTime() - now.getTime();
 	if (millis <= 0) // It's after 5AM today, so make it tomorrow
 		millis += 1000 * 60 * 60 * 24;
 	setTimeout(sendEmails, millis);
