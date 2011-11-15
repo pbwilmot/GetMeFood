@@ -76,11 +76,11 @@ function sendEmails() {
 										lunch : matches[1],
 										dinner: matches[2],
 										name : userdoc[index].name,
-										unsubscribeLink : "http://localhost:8080/unsubscribe?id=" + userdoc[index]._id };
+										unsubscribeLink : "http://www.projectfunhouse.com:8080/unsubscribe?id=" + userdoc[index]._id };
 							// TODO: Replace localhost with actual domain name
 					
 							if (data.hasBreakfast || data.hasLunch || data.hasDinner) {
-								email.sendEmailWithTemplate(userdoc[index], "Today's Menu", "emailtemplate.txt", data, function(emailerr, data) {
+								email.sendEmailWithTemplate(userdoc[index], "Today's Menu", "emailtemplate.html", data, function(emailerr, data) {
 									if (emailerr)
 										console.log("An error occurred emailing " + userdoc[index].email + ": " + emailerr);
 									else
