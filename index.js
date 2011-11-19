@@ -36,8 +36,6 @@ app.configure('production', function(){
 
 app.get("/", requestHandlers.index);
 app.get("/rattymenu", requestHandlers.rattymenu);
-app.get("/clearusers", requestHandlers.clearusers);
-app.get("/clearfoods", requestHandlers.clearfoods);
 app.get("/listdb", requestHandlers.listdb);
 app.get("/matches", requestHandlers.matches);
 app.get("/edit", requestHandlers.editGet);
