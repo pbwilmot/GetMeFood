@@ -1,5 +1,10 @@
 <script type="text/javascript">
 
+		$(document).ready(function() {
+			for (var i = 0; i < savedFoods.length; i++) {
+				addItem(savedFoods[i]);
+			}
+		});
 		function addCustom() {
 			var val = $("#customtext").val();
 			if (val.length > 0) {
@@ -10,56 +15,78 @@
 				}
 			}
 		}
-		function add_clicked() {
-			var options = document.f.globalfoods.options;
-			for (var i = 0; i < options.length; i++) {
-				if (options[i].selected) {
-					// now checkk if we've already added it
-					var chosen = document.f.foodchoices.options;
-					var found = false;
-					for (var j = 0; j < chosen.length; j++) {
-						if (chosen[j].value === options[i].value) {
-							found = true;
-							break;
-						}
-					}
-					if (!found) {
-						var opt = document.createElement("option");
-						opt.text = options[i].text;
-						opt.value = options[i].value;
-						chosen.add(opt);
-					}
-				}
-			}
-		}
 		
-		function remove_clicked() {
-			var chosen = document.f.foodchoices.options;
-			var index = 0;
-			while (index < chosen.length) {
-				if (chosen[index].selected) {
-					chosen.remove(index);
-				}
-				else
-					index++;
-			}
-		}
-		
-		var chosenFoods = <%- JSON.stringify(userfoods) %>;
+		var savedFoods = <%- JSON.stringify(userfoods) %>;
+		var chosenFoods = [];
+		var autocompleteFoods = [];
 		
 		function submit_clicked() {
 			document.f.foods.value = chosenFoods.join(',');
 		}
 		
-		function suggestFoods() {
+		function search() {
 			$.get('/autocomplete', {query : $("#customtext").val()}, function(data) {
-				var html = "<p>No matches found</p>";
-				var foods = JSON.parse(data);
-				if (foods.length != 0) {
-					html = "<p>Matches:</p><ul><li>" + foods.join('</li><li>') + "</li></ul>";
+				autocompleteFoods = JSON.parse(data);
+				if (autocompleteFoods.length != 0) {
+					var results = $("<p />");
+					
+					for (var i = 0; i < autocompleteFoods.length; i++) {
+						var icon = "[+]";
+						if ($.inArray(autocompleteFoods[i], chosenFoods) != -1)
+							icon = "[-]";
+							
+						var link = $("<a/>", { 
+							href : "#",
+							id : "addlink" + i,
+							text : icon
+						});
+						link.click(autocompleteFoods[i], function(e) { addItem(e.data) }); 
+						results.append(link);
+						results.append(" " + autocompleteFoods[i] + "<br/>");
+
+					}
+					
+					$("#autocompletefoods").html("<p>Matches:</p>").append(results);
 				}
-				$('#suggestedfoods').html(html);
+				else
+					$("#autocompletefoods").html("<p>No matches found</p>");
 			});
+		}
+		
+		function addItem(val) {
+			if ($.inArray(val, chosenFoods) == -1) {
+				var remove = function(e) { removeItem(e.data) };
+				var span = $("<span/>");
+				var link = $("<a/>", {
+					href : '#',
+					text : '[-]'
+				}).click(val, remove);
+				span.append(link);
+				span.append(" " + val + "<br />");
+				$("#selectedfoods").append(span);
+				
+				var autocompleteIndex = $.inArray(val, autocompleteFoods);
+				if (autocompleteIndex != -1) {
+					var button = $("#addlink" + autocompleteIndex);
+					button.html("[-]");
+					button.unbind('click').click(val, remove);
+				}
+				chosenFoods.push(val);
+			}
+		}
+		
+		function removeItem(val) {
+			// assume val is contained in chosenFoods
+			var index = $.inArray(val, chosenFoods); // this shouldn't return -1
+			//alert("remove " + val + " " + index);
+			chosenFoods.splice(index, 1); // remove the element
+			$("#selectedfoods span:nth-child(" + (index + 1) + ")").remove();
+			var autocompleteIndex = $.inArray(val, autocompleteFoods);
+			if (autocompleteIndex != -1) {
+				var button = $("#addlink" + autocompleteIndex);
+				button.html("[+]");
+				button.unbind('click').click(val, function(e) { addItem(e.data) });
+			}
 		}
 		
 	</script>
@@ -86,21 +113,16 @@
 				</div>
 				<label for="customtext">Type your own choices:</label>
 				<div>
-					<input type="text" id="customtext" class="xlarge span5" onkeyup="suggestFoods()" autocomplete="off" />
-					<input type="button" class="btn" value="Add" id="addcustom" onclick="addCustom()" />
+					<input type="text" id="customtext" class="xlarge span5" onkeyup="search()" autocomplete="off" />
 				</div>
-				<div id="suggestedfoods" style="height: 16em">
+				<div id="autocompletefoods" style="height: 16em">
 					<p>No matches found</p>
 				</div>
 			</div>
 			<div class="span7">
 				<p>Your selected foods:</p>
-				<ul id="selectedfoods">
-						<% for (var i = 0; i < userfoods.length; i++) { %>
-							<li><%= userfoods[i] %></li>
-						<% } %>
-				</ul><br />
-				<input type="button" value="Remove" name="remove" onclick="remove_clicked()" class="btn" />
+				<p id="selectedfoods">
+				</p><br />
 			</div>
 		</div>
 		<div class="row">

@@ -36,7 +36,7 @@ for (var i = 0; i < ignoredWords.length; i++) {
 	ignore[ignoredWords[i]] = true;
 }
 
-var synonyms = {'sr' : 'sour', 'mac' : 'macaroni', 'rasp' : 'raspberry' , '&' : 'and'};
+var synonyms = {'sr' : 'sour', 'mac' : 'macaroni', 'rasp' : 'raspberry' , '&' : 'and', 'w' : 'with'};
 
 // Adds a list of foods to a given collection in the database
 // itemList: a list of three String arrays: breakfast, lunch, and dinner menus, with no processing done on the individual menu item strings
@@ -147,6 +147,8 @@ function matchKeywords(searchStr, collection, callback) {
 		callback(null, []);
 		return;
 	}
+	// TODO: Change this so partial word is only included if there is no trailing space. Also remove partial matching entirely for morning email matching
+	// TODO: Using mongoDB range query for partial keywords for efficiency
 	var partial = kw.pop();
 	var cond = {};
 	if (kw.length > 0)
