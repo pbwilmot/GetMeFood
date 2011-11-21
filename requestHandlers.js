@@ -67,8 +67,13 @@ function validateEmail(addr) {
 }
 
 function autocomplete(req, res) {
-	db.matchKeywords(req.param('query'), db.GlobalFood, function(err, docs) {
-		res.send(JSON.stringify(docs.map(function(doc) { return doc.name })));
+	db.matchKeywords(req.param('query'), true, db.GlobalFood, function(err, docs) {
+		if (err) {
+			console.log("autocomplete failed: " + err);
+			res.send('[]');
+		}
+		else
+			res.send(JSON.stringify(docs.map(function(doc) { return doc.name })));
 	});
 }
 

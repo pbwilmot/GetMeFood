@@ -23,8 +23,9 @@ var GlobalFood = new Schema({
 	name : String,
 	score : Number,
 	frequency : Number,
-	keywords : [String]
-}).index({keywords:1});
+	keywords : [String],
+	partials : [String]
+}).index({keywords:1}).index({partials:1});
 
 GlobalFood = mongoose.model("GlobalFood", GlobalFood);
 MenuFood = mongoose.model("MenuFood", MenuFood);
@@ -48,8 +49,8 @@ function addItems(itemList, collection, callback) {
 	for (var i = 0; i < itemList.length; i++) {
 		for (var j = 0; j < itemList[i].length; j++) {
 			// now add this i
-			var kw = parseKeywords(itemList[i][j]);
-			var food = { name : itemList[i][j], keywords : kw };
+			var kw = parseKeywords(itemList[i][j]).keywords;
+			var food = { name : itemList[i][j], keywords : kw, partials : getPartialKeywords(kw) };
 			if (i == 0)
 				food.breakfast = true;
 			else if (i == 1)
@@ -79,10 +80,16 @@ function updateGlobal() {
 	GlobalFood.find({}, function(err, docs) {
 		// TODO: Remove occurrence field
 		for (var i = 0; i < docs.length; i++) {
-			docs[i].keywords = parseKeywords(docs[i].name);
+			docs[i].keywords = parseKeywords(docs[i].name).keywords;
+			docs[i].partials = getPartialKeywords(docs[i].keywords);
 			docs[i].frequency = 0;
 			docs[i].score = 0;
-			docs[i].save();
+			docs[i].save(function(err) { 
+				if (err)
+					console.log(err);
+				else
+					console.log("Database updated successfully");
+			});
 		}
 	});
 }
@@ -118,11 +125,13 @@ function setMenu(itemList, callback) {
 // Parses a raw menu item string into a list of keywords. Returns the list of keywords as an array of strings
 // For example, 'mac and cheese' would be become ['macaroni',cheese']
 // itemName: a string containing the item to parse
-function parseKeywords(itemName) {
+function parseKeywords(itemName, lastPartial) {
 	var pattern = /[&\w\'-]+/g;
 	var word;
 	var keywords = [];
+	var index = -1;
 	while ((word = pattern.exec(itemName)) != null) {
+		index = pattern.lastIndex;
 		var lower = word[0].toLowerCase();
 		if (!ignore[lower]) {
 			if (synonyms[lower] === undefined)
@@ -131,28 +140,42 @@ function parseKeywords(itemName) {
 				keywords.push(synonyms[lower]);
 		}
 	}
-	return keywords;
+	
+	return { keywords : keywords, index : index } ;
+}
+
+function getPartialKeywords(keywords) {
+	var partials = [];
+	for (var i = 0; i < keywords.length; i++) {
+		for (var j = 1; j <= keywords[i].length; j++) {
+			partials.push(keywords[i].substring(0, j));
+		}
+	}
+	return partials;
 }
 
 // Gets all global foods that match a given string
 // searchStr: The string to parse into keywords and search for
 // collection: The collection to search; either MenuFood or GlobalFood
 // callback: a function(doc, err) containing the results
-function matchKeywords(searchStr, collection, callback) {
-	/*var kw = parseKeywords(searchStr);
-	collection.find({keywords : {$all : kw}}, callback);*/
-	var kw = parseKeywords(searchStr);
+function matchKeywords(searchStr, matchPartial, collection, callback) {
+	var parsed = parseKeywords(searchStr);
+	var kw = parsed.keywords;
+	var index = parsed.index;
 	if (kw.length == 0) {
 		// Return empty for an empty string instead of returning everything
 		callback(null, []);
 		return;
 	}
-	// TODO: Change this so partial word is only included if there is no trailing space. Also remove partial matching entirely for morning email matching
+	// TODO: Test matchPartial for autocomplete vs. emails
 	// TODO: Using mongoDB range query for partial keywords for efficiency
-	var partial = kw.pop();
+	var partial = null;
+	if (index == searchStr.length && matchPartial)
+		partial = kw.pop();
 	var cond = {};
 	if (kw.length > 0)
-		cond = {keywords : {$all : kw}};
+		cond = {keywords : {$all: kw}};
+	console.log(cond);
 	collection.find(cond, function(err, doc) {
 		if (err) {
 			callback(err, null);
@@ -173,6 +196,7 @@ function matchKeywords(searchStr, collection, callback) {
 			}
 			doc = newdoc;
 		}
+		// TODO: This probably gives more than 10 results if partial == null
 		callback(null, doc);
 	});
 }
@@ -182,5 +206,4 @@ exports.MenuFood = MenuFood;
 exports.GlobalFood = GlobalFood;
 exports.setMenu = setMenu;
 exports.matchKeywords = matchKeywords;
-exports.parseKeywords = parseKeywords;
 exports.updateGlobal = updateGlobal;

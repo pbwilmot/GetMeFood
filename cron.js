@@ -12,7 +12,7 @@ function getDailyMatches(user, callback) {
 	var counter = user.foods.length;
 	var stop = false;
 	for (var i = 0; i < user.foods.length; i++) {
-		db.matchKeywords(user.foods[i], db.MenuFood, function(err, doc) {
+		db.matchKeywords(user.foods[i], false, db.MenuFood, function(err, doc) {
 			if (err & !stop) {
 				stop = true;
 				callback(err, null);
