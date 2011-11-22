@@ -23,9 +23,8 @@ var GlobalFood = new Schema({
 	name : String,
 	score : Number,
 	frequency : Number,
-	keywords : [String],
-	partials : [String]
-}).index({keywords:1}).index({partials:1});
+	keywords : [String]
+}).index({keywords:1});
 
 GlobalFood = mongoose.model("GlobalFood", GlobalFood);
 MenuFood = mongoose.model("MenuFood", MenuFood);
@@ -43,14 +42,16 @@ var synonyms = {'sr' : 'sour', 'mac' : 'macaroni', 'rasp' : 'raspberry' , '&' : 
 // itemList: a list of three String arrays: breakfast, lunch, and dinner menus, with no processing done on the individual menu item strings
 // collection: which food collection to add it too (GlobalFood or MenuFood)
 // callback: a function(err) which is called when this function completes
-function addItems(itemList, collection, callback) {
+function addItems(itemList, partialKeywords, collection, callback) {
 	var counter = itemList[0].length + itemList[1].length + itemList[2].length;
 	var stop = false;
 	for (var i = 0; i < itemList.length; i++) {
 		for (var j = 0; j < itemList[i].length; j++) {
 			// now add this i
-			var kw = parseKeywords(itemList[i][j]).keywords;
-			var food = { name : itemList[i][j], keywords : kw, partials : getPartialKeywords(kw) };
+			var kw = parseKeywords(itemList[i][j], false);
+			if (partialKeywords)
+				kw = getPartialKeywords(kw);
+			var food = { name : itemList[i][j], keywords : kw };
 			if (i == 0)
 				food.breakfast = true;
 			else if (i == 1)
@@ -80,8 +81,7 @@ function updateGlobal() {
 	GlobalFood.find({}, function(err, docs) {
 		// TODO: Remove occurrence field
 		for (var i = 0; i < docs.length; i++) {
-			docs[i].keywords = parseKeywords(docs[i].name).keywords;
-			docs[i].partials = getPartialKeywords(docs[i].keywords);
+			docs[i].keywords = getPartialKeywords(parseKeywords(docs[i].name), false);
 			docs[i].frequency = 0;
 			docs[i].score = 0;
 			docs[i].save(function(err) { 
@@ -111,14 +111,14 @@ function setMenu(itemList, callback) {
 				callback(null);
 		}
 	};
-	addItems(itemList, GlobalFood, func);
+	addItems(itemList, true, GlobalFood, func);
 	MenuFood.remove({}, function(err) {
 		if (err && !stop) {
 			stop = true;
 			callback(err);
 		}
 		if (!stop)
-			addItems(itemList, MenuFood, func);
+			addItems(itemList, false, MenuFood, func);
 	});
 }
 
@@ -129,19 +129,18 @@ function parseKeywords(itemName, lastPartial) {
 	var pattern = /[&\w\'-]+/g;
 	var word;
 	var keywords = [];
-	var index = -1;
 	while ((word = pattern.exec(itemName)) != null) {
 		index = pattern.lastIndex;
-		var lower = word[0].toLowerCase();
-		if (!ignore[lower]) {
-			if (synonyms[lower] === undefined)
-				keywords.push(lower);
-			else
-				keywords.push(synonyms[lower]);
+		var str = word[0].toLowerCase();
+		if (!ignore[str]) {
+			if (synonyms[str] !== undefined)
+				str = synonyms[str];
+			if (pattern.lastIndex != itemName.length || !lastPartial)
+				str += " ";
+			keywords.push(str);
 		}
 	}
-	
-	return { keywords : keywords, index : index } ;
+	return keywords;
 }
 
 function getPartialKeywords(keywords) {
@@ -158,30 +157,21 @@ function getPartialKeywords(keywords) {
 // searchStr: The string to parse into keywords and search for
 // collection: The collection to search; either MenuFood or GlobalFood
 // callback: a function(doc, err) containing the results
-function matchKeywords(searchStr, matchPartial, collection, callback) {
-	var parsed = parseKeywords(searchStr);
-	var kw = parsed.keywords;
-	var index = parsed.index;
+function matchKeywords(searchStr, lastKeywordPartial, collection, callback) {
+	var kw = parseKeywords(searchStr, lastKeywordPartial);
 	if (kw.length == 0) {
 		// Return empty for an empty string instead of returning everything
 		callback(null, []);
 		return;
 	}
-	// TODO: Test matchPartial for autocomplete vs. emails
-	// TODO: Using mongoDB range query for partial keywords for efficiency
-	var partial = null;
-	if (index == searchStr.length && matchPartial)
-		partial = kw.pop();
-	var cond = {};
-	if (kw.length > 0)
-		cond = {keywords : {$all: kw}};
+	var cond = {keywords : {$all : kw}};
 	console.log(cond);
-	collection.find(cond, function(err, doc) {
+	collection.find(cond, null, { limit: 10 }, function(err, doc) {
 		if (err) {
 			callback(err, null);
 			return;
 		}
-		if (partial != null) {
+		/*if (partial != null) {
 			var newdoc = [];
 			// Only include results with the partial keyword, up to a max of 10
 			for (var i = 0; i < doc.length; i++) {
@@ -195,7 +185,7 @@ function matchKeywords(searchStr, matchPartial, collection, callback) {
 					break;
 			}
 			doc = newdoc;
-		}
+		}*/
 		// TODO: This probably gives more than 10 results if partial == null
 		callback(null, doc);
 	});
