@@ -165,28 +165,11 @@ function matchKeywords(searchStr, lastKeywordPartial, collection, callback) {
 		return;
 	}
 	var cond = {keywords : {$all : kw}};
-	console.log(cond);
 	collection.find(cond, null, { limit: 10 }, function(err, doc) {
 		if (err) {
 			callback(err, null);
 			return;
 		}
-		/*if (partial != null) {
-			var newdoc = [];
-			// Only include results with the partial keyword, up to a max of 10
-			for (var i = 0; i < doc.length; i++) {
-				for (var j = 0; j < doc[i].keywords.length; j++) {
-					if (doc[i].keywords[j].lastIndexOf(partial, 0) == 0) { // lastIndexOf is more efficient than indexOf for this case
-						newdoc.push(doc[i]);
-						break;
-					}
-				}	
-				if (newdoc.length == 10)
-					break;
-			}
-			doc = newdoc;
-		}*/
-		// TODO: This probably gives more than 10 results if partial == null
 		callback(null, doc);
 	});
 }
