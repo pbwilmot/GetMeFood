@@ -36,7 +36,7 @@ for (var i = 0; i < ignoredWords.length; i++) {
 	ignore[ignoredWords[i]] = true;
 }
 
-var synonyms = {'sr' : 'sour', 'mac' : 'macaroni', 'rasp' : 'raspberry' , '&' : 'and', 'w' : 'with'};
+var synonyms = {'sr' : 'sour', 'mac' : 'macaroni', 'rasp' : 'raspberry' , '&' : 'and', 'w' : 'with', 'carribean' : 'caribbean' };
 
 // Adds a list of foods to a given collection in the database
 // itemList: a list of three String arrays: breakfast, lunch, and dinner menus, with no processing done on the individual menu item strings

@@ -31,16 +31,22 @@
 					var results = $("<p />");
 					
 					for (var i = 0; i < autocompleteFoods.length; i++) {
-						var icon = "[+]";
-						if ($.inArray(autocompleteFoods[i], chosenFoods) != -1)
-							icon = "[-]";
+						if ($.inArray(autocompleteFoods[i], chosenFoods) != -1) {
+							var icon = "[-]";
+							var handler = function(e) { removeItem(e.data) };
+						}
+						else {
+							var icon = '[+]';
+							var handler = function(e) { addItem(e.data) };
+						}
 							
 						var link = $("<a/>", { 
 							href : "#",
 							id : "addlink" + i,
 							text : icon
 						});
-						link.click(autocompleteFoods[i], function(e) { addItem(e.data) }); 
+						
+						link.click(autocompleteFoods[i], handler); 
 						results.append(link);
 						results.append(" " + autocompleteFoods[i] + "<br/>");
 
