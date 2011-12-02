@@ -33,11 +33,11 @@
 					for (var i = 0; i < autocompleteFoods.length; i++) {
 						if ($.inArray(autocompleteFoods[i], chosenFoods) != -1) {
 							var icon = "[-]";
-							var handler = function(e) { removeItem(e.data) };
+							var handler = function(e) { removeItem(e.data); return false; };
 						}
 						else {
 							var icon = '[+]';
-							var handler = function(e) { addItem(e.data) };
+							var handler = function(e) { addItem(e.data); return false; };
 						}
 							
 						var link = $("<a/>", { 
@@ -52,6 +52,8 @@
 
 					}
 					
+					
+					
 					$("#autocompletefoods").html("<p>Matches:</p>").append(results);
 				}
 				else
@@ -61,7 +63,7 @@
 		
 		function addItem(val) {
 			if ($.inArray(val, chosenFoods) == -1) {
-				var remove = function(e) { removeItem(e.data) };
+				var remove = function(e) { removeItem(e.data); return false; };
 				var span = $("<span/>");
 				var link = $("<a/>", {
 					href : '#',
@@ -133,9 +135,9 @@
 		</div>
 		<div class="row">
 			<div class="span16">
-					<label><input type="checkbox" name="meals" value="breakfast" />Breakfast</label>
-					<label><input type="checkbox" name="meals" value="lunch" />Lunch</label>
-					<label><input type="checkbox" name="meals" value="dinner" />Dinner</label>
+					<label><input type="checkbox" name="meals" value="breakfast" <% if (matchBreakfast) { %>checked<% } %> />Breakfast</label>
+					<label><input type="checkbox" name="meals" value="lunch" <% if (matchLunch) { %>checked<% } %> />Lunch</label>
+					<label><input type="checkbox" name="meals" value="dinner" <% if (matchDinner) { %>checked<% } %> />Dinner</label>
 				<input type="hidden" name="email" value="<%= email %>"/>
 				<input type="hidden" name="foods" />
 				<div>

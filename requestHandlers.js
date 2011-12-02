@@ -32,6 +32,24 @@ function editPost(req, res) {
 		}
 
 		user.name = req.param('name');
+		var meals = req.param('meals');
+		
+		// if no meals are checked, this is undefined
+		// if one is checked, it's a string
+		// if multiple, it's an array
+		if (meals === undefined) {
+			errors.push('You must choose at least one meal to be notified about');
+		}
+		else if (meals instanceof Array) {
+			user.breakfast = (meals.indexOf('breakfast') != -1);
+			user.lunch = (meals.indexOf('lunch') != -1);
+			user.dinner = (meals.indexOf('dinner') != -1);
+		}
+		else {
+			user.breakfast = (meals === 'breakfast');
+			user.lunch = (meals === 'lunch');
+			user.dinner = (meals === 'dinner');
+		}
 		if (user.name === undefined || user.name.length == 0)
 			errors.push('You must enter a name');
 		user.email = req.param('email');
@@ -55,7 +73,8 @@ function editPost(req, res) {
 			db.GlobalFood.find({}, function(fooderr, fooddoc) {
 				if (fooderr)
 					throw fooderr;
-				res.render('edit', {globalfoods : fooddoc, email : user.email, userfoods: user.foods, username: user.name, errors: errors});
+				res.render('edit', {globalfoods : fooddoc, email : user.email, userfoods: user.foods, username: user.name, errors: errors,
+					matchBreakfast : user.breakfast, matchLunch : user.lunch, matchDinner : user.dinner });
 			});
 		}
 	
@@ -89,11 +108,18 @@ function editGet(req, res) {
 			db.User.findOne({email: emailAddr}, function(usererr, userdoc) {
 				var userfoods = [];
 				var username = "";
+				var matchBreakfast = true;
+				var matchLunch = true;
+				var matchDinner = true;
 				if (userdoc != null) {
 					userfoods = userdoc.foods;
 					username = userdoc.name;
+					matchBreakfast = userdoc.breakfast;
+					matchLunch = userdoc.lunch;
+					matchDinner = userdoc.dinner;
 				}
-				res.render("edit", {globalfoods: fooddoc, email : emailAddr, userfoods: userfoods, username: username, errors: []});
+				res.render("edit", {globalfoods: fooddoc, email : emailAddr, userfoods: userfoods, username: username, errors: [], matchBreakfast : matchBreakfast,
+					matchLunch : matchLunch, matchDinner : matchDinner });
 			});
 		});
 	}
