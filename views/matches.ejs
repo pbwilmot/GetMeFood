@@ -9,6 +9,7 @@
 			<% for (var i = 0; i < users.length; i++) { %>
 				<li><code><%= JSON.stringify(users[i].user) %></code>
 					<ul>
+						<% if (users[i].user.breakfast) { %>
 						<li>Breakfast
 							<ul>
 								<% for (var j = 0; j < users[i].bmatches.length; j++) { %>
@@ -16,6 +17,7 @@
 								<% } %>
 							</ul>
 						</li>
+						<% } if (users[i].user.lunch) { %>
 						<li>Lunch
 							<ul>
 								<% for (var j = 0; j < users[i].lmatches.length; j++) { %>
@@ -23,6 +25,7 @@
 								<% } %>
 							</ul>
 						</li>
+						<% } if (users[i].user.dinner) { %>
 						<li>Dinner
 							<ul>
 								<% for (var j = 0; j < users[i].dmatches.length; j++) { %>
@@ -30,6 +33,7 @@
 								<% } %>
 							</ul>
 						</li>
+						<% } %>
 					</ul>
 				</code></li>
 			<% } %>

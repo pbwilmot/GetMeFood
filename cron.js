@@ -19,9 +19,12 @@ function getDailyMatches(user, callback) {
 			}
 			if (!stop) {
 				if (doc.length > 0) {
-					mealMatches[0] = doc.filter(function(a) { return a.breakfast }).map(function(a) { return a.name });
-					mealMatches[1] = doc.filter(function(a) { return a.lunch }).map(function(a) { return a.name });		
-					mealMatches[2] = doc.filter(function(a) { return a.dinner }).map(function(a) { return a.name });			
+					if (user.breakfast)
+						mealMatches[0] = doc.filter(function(a) { return a.breakfast }).map(function(a) { return a.name });
+					if (user.lunch)
+						mealMatches[1] = doc.filter(function(a) { return a.lunch }).map(function(a) { return a.name });	
+					if (user.dinner)	
+						mealMatches[2] = doc.filter(function(a) { return a.dinner }).map(function(a) { return a.name });			
 				}
 				counter--;
 				if (counter == 0) {
